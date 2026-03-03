@@ -1,13 +1,11 @@
-"""
-Simple script to verify the SQLite database was created correctly
-"""
+# 验证 SQLite 数据库是否正确创建的简单脚本
 import sqlite3
 import os
 
 db_path = os.path.join(os.path.dirname(__file__), 'lab_asset_management.db')
 
 print("=" * 60)
-print("SQLite Database Verification")
+print("SQLite 数据库验证")
 print("=" * 60)
 print(f"Database: {os.path.abspath(db_path)}")
 print()
@@ -15,7 +13,7 @@ print()
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-# Get all tables
+# 获取所有表
 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
 tables = cursor.fetchall()
 

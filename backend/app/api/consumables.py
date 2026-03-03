@@ -1,6 +1,4 @@
-"""
-Consumable management API routes
-"""
+# 耗材管理 API 路由
 from flask import Blueprint, request
 from app.models import Consumable, Category, Supplier
 from app.utils.decorators import login_required, admin_required
@@ -13,28 +11,28 @@ consumables_bp = Blueprint('consumables', __name__)
 @consumables_bp.route('', methods=['GET'])
 @login_required
 def get_consumables():
-    """Get list of consumables with filtering and pagination"""
-    # Get query parameters
+    # 获取耗材列表（支持过滤和分页）
+    # 获取查询参数
     category_id = request.args.get('category_id', type=int)
     low_stock = request.args.get('low_stock', type=bool)
     page, page_size = validate_pagination()
-    
-    # Build query
+
+    # 构建查询
     query = Consumable.query
-    
-    # Apply filters
+
+    # 应用过滤条件
     if category_id:
         query = query.filter_by(category_id=category_id)
     if low_stock:
         query = query.filter(Consumable.stock < Consumable.min_stock)
-    
-    # Order by created_at descending
+
+    # 按创建时间降序排列
     query = query.order_by(Consumable.created_at.desc())
-    
-    # Paginate
+
+    # 分页
     pagination = query.paginate(page=page, per_page=page_size, error_out=False)
-    
-    # Convert to dict
+
+    # 转换为字典
     items = [consumable.to_dict() for consumable in pagination.items]
     
     return paginated_response(items, pagination.total, page, page_size)
@@ -43,11 +41,11 @@ def get_consumables():
 @consumables_bp.route('/<int:consumable_id>', methods=['GET'])
 @login_required
 def get_consumable(consumable_id):
-    """Get consumable details"""
+    # 获取耗材详情
     consumable = Consumable.query.get(consumable_id)
-    
+
     if not consumable:
-        return error_response('Consumable not found', error_code='NOT_FOUND', status=404)
+        return error_response('耗材不存在', error_code='NOT_FOUND', status=404)
     
     return success_response(data=consumable.to_dict())
 
@@ -55,27 +53,27 @@ def get_consumable(consumable_id):
 @consumables_bp.route('', methods=['POST'])
 @admin_required
 def create_consumable():
-    """Create a new consumable (admin only)"""
+    # 创建新耗材（仅管理员）
     data = request.get_json()
-    
-    # Validate required fields
+
+    # 验证必填字段
     is_valid, error_msg = validate_required_fields(data, ['name', 'category_id'])
     if not is_valid:
         return error_response(error_msg, error_code='VALIDATION_ERROR')
-    
-    # Check if category exists
+
+    # 检查类别是否存在
     category = Category.query.get(data['category_id'])
     if not category:
-        return error_response('Category not found', error_code='NOT_FOUND', status=404)
-    
-    # Check if supplier exists (if provided)
+        return error_response('类别不存在', error_code='NOT_FOUND', status=404)
+
+    # 检查供应商是否存在（如果提供）
     supplier = None
     if data.get('supplier_id'):
         supplier = Supplier.query.get(data['supplier_id'])
         if not supplier:
-            return error_response('Supplier not found', error_code='NOT_FOUND', status=404)
-    
-    # Generate consumable code (CON-XXXX format)
+            return error_response('供应商不存在', error_code='NOT_FOUND', status=404)
+
+    # 生成耗材编码（CON-XXXX 格式）
     from app.extensions import db
     last_consumable = Consumable.query.order_by(Consumable.id.desc()).first()
     if last_consumable:
@@ -83,8 +81,8 @@ def create_consumable():
     else:
         last_id = 0
     code = f"CON-{last_id + 1:04d}"
-    
-    # Create consumable
+
+    # 创建耗材
     consumable = Consumable(
         name=data['name'],
         code=code,
@@ -116,33 +114,33 @@ def create_consumable():
         print(f"Consumable creation error: {e}")
         print(f"Request data: {data}")
         print(traceback.format_exc())
-        return error_response(f'Failed to create consumable: {str(e)}', error_code='INTERNAL_ERROR', status=500)
+        return error_response(f'耗材创建失败: {str(e)}', error_code='INTERNAL_ERROR', status=500)
 
 
 @consumables_bp.route('/<int:consumable_id>', methods=['PUT'])
 @admin_required
 def update_consumable(consumable_id):
-    """Update a consumable (admin only)"""
+    # 更新耗材（仅管理员）
     consumable = Consumable.query.get(consumable_id)
-    
+
     if not consumable:
-        return error_response('Consumable not found', error_code='NOT_FOUND', status=404)
-    
+        return error_response('耗材不存在', error_code='NOT_FOUND', status=404)
+
     data = request.get_json()
-    
-    # Update fields
+
+    # 更新字段
     if 'name' in data:
         consumable.name = data['name']
     if 'category_id' in data:
         category = Category.query.get(data['category_id'])
         if not category:
-            return error_response('Category not found', error_code='NOT_FOUND', status=404)
+            return error_response('类别不存在', error_code='NOT_FOUND', status=404)
         consumable.category_id = data['category_id']
     if 'supplier_id' in data:
         if data['supplier_id']:
             supplier = Supplier.query.get(data['supplier_id'])
             if not supplier:
-                return error_response('Supplier not found', error_code='NOT_FOUND', status=404)
+                return error_response('供应商不存在', error_code='NOT_FOUND', status=404)
         consumable.supplier_id = data['supplier_id']
     if 'unit' in data:
         consumable.unit = data['unit']
@@ -172,17 +170,17 @@ def update_consumable(consumable_id):
         db.session.rollback()
         print(f"Consumable update error: {e}")
         print(traceback.format_exc())
-        return error_response(f'Failed to update consumable: {str(e)}', error_code='INTERNAL_ERROR', status=500)
+        return error_response(f'耗材更新失败: {str(e)}', error_code='INTERNAL_ERROR', status=500)
 
 
 @consumables_bp.route('/<int:consumable_id>', methods=['DELETE'])
 @admin_required
 def delete_consumable(consumable_id):
-    """Delete a consumable (admin only)"""
+    # 删除耗材（仅管理员）
     consumable = Consumable.query.get(consumable_id)
-    
+
     if not consumable:
-        return error_response('Consumable not found', error_code='NOT_FOUND', status=404)
+        return error_response('耗材不存在', error_code='NOT_FOUND', status=404)
     
     try:
         from app.extensions import db
@@ -193,4 +191,4 @@ def delete_consumable(consumable_id):
     except Exception as e:
         from app.extensions import db
         db.session.rollback()
-        return error_response('Failed to delete consumable', error_code='INTERNAL_ERROR', status=500)
+        return error_response('耗材删除失败', error_code='INTERNAL_ERROR', status=500)

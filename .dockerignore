@@ -1,0 +1,25 @@
+# Git
+.git/
+.gitignore
+
+# 文档
+*.md
+docs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+*.log
+
+# 临时文件
+*.tmp
+*.bak
+.DS_Store
+
+# Docker
+docker-compose*.yml
+Dockerfile*

@@ -1,6 +1,4 @@
-"""
-Database models for the Lab Asset Management System
-"""
+# 实验室资产管理系统数据模型
 from app.models.user import User
 from app.models.category import Category
 from app.models.supplier import Supplier

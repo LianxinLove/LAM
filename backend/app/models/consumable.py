@@ -1,13 +1,11 @@
-"""
-Consumable model for managing lab supplies and materials
-"""
+# 耗材模型 - 管理实验室用品和材料
 from datetime import datetime
 from decimal import Decimal
 from app.extensions import db
 
 
 class Consumable(db.Model):
-    """Consumable model for lab supplies and materials"""
+    # 耗材模型 - 实验室用品和材料
     __tablename__ = 'consumables'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -22,17 +20,17 @@ class Consumable(db.Model):
     location = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
-    # Relationships
+
+    # 关系定义
     pick_records = db.relationship('PickRecord', backref='item', lazy='dynamic')
-    
+
     @property
     def is_low_stock(self):
-        """Check if stock is below minimum"""
+        # 检查库存是否低于最小值
         return self.stock < self.min_stock
-    
+
     def to_dict(self):
-        """Convert consumable to dictionary"""
+        # 将耗材转换为字典
         return {
             'id': self.id,
             'name': self.name,

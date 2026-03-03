@@ -1,6 +1,4 @@
-"""
-Debug JWT token validation
-"""
+# 调试 JWT 令牌验证
 import sys
 import json
 from flask import Flask
@@ -9,29 +7,29 @@ from app.config import Config
 from app.models import User
 from app.extensions import db
 
-# Fix Windows console encoding
+# 修复 Windows 控制台编码
 if sys.platform == 'win32':
     import codecs
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
-# Create Flask app
+# 创建 Flask 应用
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
 jwt = JWTManager(app)
 
-# Test token
+# 测试令牌
 test_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MDk1NjU1MiwianRpIjoiYjUyZjUzZTctNzUzZi00YjU3LWEwM2UtMzY4ZjUzZjUzZjUzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzQwOTU2NTUyLCJleHAiOjE3NDEwNDI5NTJ9.7xKp9Q3rT7mN8vK2lP5qR6sT8uV1wX2yZ3aB4cD5eF6"
 
 print("=" * 60)
-print("JWT Token Debug")
+print("JWT 令牌调试")
 print("=" * 60)
 
 print(f"\nJWT_SECRET_KEY: {app.config['JWT_SECRET_KEY']}")
 print(f"JWT_ACCESS_TOKEN_EXPIRES: {app.config['JWT_ACCESS_TOKEN_EXPIRES']}")
 
-# Try to decode the token
+# 尝试解码令牌
 try:
     with app.app_context():
         decoded = decode_token(test_token)
@@ -40,7 +38,7 @@ try:
 except Exception as e:
     print(f"\n✗ Failed to decode token: {e}")
 
-# Try to create a new token
+# 尝试创建新令牌
 try:
     with app.app_context():
         user = User.query.get(1)
@@ -49,8 +47,8 @@ try:
             print(f"\n✓ New token created successfully!")
             print(f"  User: {user.username}")
             print(f"  Token: {new_token}")
-            
-            # Try to decode the new token
+
+            # 尝试解码新令牌
             decoded_new = decode_token(new_token)
             print(f"  Decoded new token: {json.dumps(decoded_new, indent=2)}")
         else:

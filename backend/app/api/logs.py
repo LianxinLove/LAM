@@ -1,6 +1,4 @@
-"""
-Operation log API routes
-"""
+# 操作日志 API 路由
 from flask import Blueprint, request
 from app.models import OperationLog
 from app.utils.decorators import login_required, admin_required
@@ -14,19 +12,19 @@ logs_bp = Blueprint('logs', __name__)
 @login_required
 @admin_required
 def get_logs():
-    """Get operation logs (admin only)"""
+    # 获取操作日志（仅管理员）
     page, page_size = validate_pagination()
-    
-    # Limit to last 100 records
+
+    # 限制查询最近 100 条记录
     query = OperationLog.query
-    
-    # Order by timestamp descending
+
+    # 按时间戳降序排列
     query = query.order_by(OperationLog.timestamp.desc())
-    
-    # Paginate
+
+    # 分页
     pagination = query.paginate(page=page, per_page=page_size, error_out=False)
-    
-    # Convert to dict
+
+    # 转换为字典
     items = [log.to_dict() for log in pagination.items]
     
     return paginated_response(items, pagination.total, page, page_size)

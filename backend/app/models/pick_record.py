@@ -1,12 +1,10 @@
-"""
-PickRecord model for managing consumable picking requests
-"""
+# 领用记录模型 - 管理耗材领用申请
 from datetime import datetime
 from app.extensions import db
 
 
 class PickRecord(db.Model):
-    """PickRecord model for consumable picking requests"""
+    # 领用记录模型 - 耗材领用申请
     __tablename__ = 'pick_records'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -18,14 +16,14 @@ class PickRecord(db.Model):
     approver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
-    # Status enum values
+
+    # 状态枚举值
     STATUS_PENDING = 'pending'
     STATUS_APPROVED = 'approved'
     STATUS_REJECTED = 'rejected'
-    
+
     def to_dict(self):
-        """Convert pick record to dictionary"""
+        # 将领用记录转换为字典
         return {
             'id': self.id,
             'item': {

@@ -1,12 +1,10 @@
-"""
-Supplier model for vendor information
-"""
+# 供应商模型 - 供应商信息
 from datetime import datetime
 from app.extensions import db
 
 
 class Supplier(db.Model):
-    """Supplier model for vendor information"""
+    # 供应商模型 - 供应商信息
     __tablename__ = 'suppliers'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -16,14 +14,14 @@ class Supplier(db.Model):
     email = db.Column(db.String(120), nullable=True)
     address = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
-    # Relationships
+
+    # 关系定义
     assets = db.relationship('Asset', backref='supplier', lazy='dynamic')
     consumables = db.relationship('Consumable', backref='supplier', lazy='dynamic')
     purchase_requests = db.relationship('PurchaseRequest', backref='supplier', lazy='dynamic')
-    
+
     def to_dict(self):
-        """Convert supplier to dictionary"""
+        # 将供应商转换为字典
         return {
             'id': self.id,
             'name': self.name,

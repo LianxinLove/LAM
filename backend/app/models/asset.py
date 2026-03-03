@@ -1,13 +1,11 @@
-"""
-Asset model for managing lab equipment and instruments
-"""
+# 资产模型 - 管理实验室设备和仪器
 from datetime import datetime
 from decimal import Decimal
 from app.extensions import db
 
 
 class Asset(db.Model):
-    """Asset model for lab equipment and instruments"""
+    # 资产模型 - 实验室设备和仪器
     __tablename__ = 'assets'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -20,29 +18,29 @@ class Asset(db.Model):
     purchase_price = db.Column(db.Numeric(12, 2), nullable=True)
     status = db.Column(db.String(20), nullable=False, default='available', index=True)
     location = db.Column(db.String(100), nullable=True)
-    custodian = db.Column(db.String(100), nullable=True)  # Custodian name as string
-    custodian_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Deprecated, kept for compatibility
+    custodian = db.Column(db.String(100), nullable=True)  # 保管人名称（字符串）
+    custodian_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # 已弃用，保留以兼容
     remarks = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
-    # Relationships
+    # 关系定义
     borrow_records = db.relationship('BorrowRecord', backref='asset', lazy='dynamic')
     transfer_requests = db.relationship('AssetTransfer', backref='asset', lazy='dynamic')
-    
-    # Status enum values
+
+    # 状态枚举值
     STATUS_AVAILABLE = 'available'
     STATUS_IN_USE = 'in_use'
     STATUS_MAINTENANCE = 'maintenance'
     STATUS_RETIRED = 'retired'
-    
+
     @property
     def is_available(self):
-        """Check if asset is available for borrowing"""
+        # 检查资产是否可借用
         return self.status == self.STATUS_AVAILABLE
-    
+
     def to_dict(self, include_details=False):
-        """Convert asset to dictionary"""
+        # 将资产转换为字典
         data = {
             'id': self.id,
             'name': self.name,

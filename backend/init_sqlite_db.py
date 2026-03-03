@@ -1,7 +1,5 @@
-"""
-SQLite Database initialization script for Lab Asset Management System
-Creates the SQLite database with all tables and initial data
-"""
+# 实验室资产管理系统 - SQLite 数据库初始化脚本
+# 创建包含所有表和初始数据的 SQLite 数据库
 import os
 import sys
 from datetime import datetime, timedelta
@@ -15,34 +13,34 @@ from app.extensions import db
 
 
 def init_database():
-    """Initialize the SQLite database with tables and initial data"""
+    # 使用表和初始数据初始化 SQLite 数据库
     print("=" * 60)
     print("Lab Asset Management System - SQLite Database Initialization")
     print("=" * 60)
     print()
-    
-    # Create Flask app
+
+    # 创建 Flask 应用
     app = create_app(config['default'])
-    
+
     with app.app_context():
-        # Get database path
+        # 获取数据库路径
         db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
         print(f"Database location: {os.path.abspath(db_path)}")
         print()
-        
-        # Drop all existing tables (for clean initialization)
+
+        # 删除所有现有表（用于清洁初始化）
         print("Dropping existing tables (if any)...")
         db.drop_all()
         print("✓ Existing tables dropped")
         print()
-        
-        # Create all tables
+
+        # 创建所有表
         print("Creating database tables...")
         db.create_all()
         print("✓ Database tables created successfully!")
         print()
-        
-        # Create admin user
+
+        # 创建管理员用户
         print("Creating admin user...")
         admin = User(
             username='admin',
@@ -57,7 +55,7 @@ def init_database():
         print("  Username: admin")
         print("  Password: admin123")
         print()
-        
+
         # Create regular test user
         print("Creating test user...")
         test_user = User(
@@ -73,7 +71,7 @@ def init_database():
         print("  Username: testuser")
         print("  Password: test123")
         print()
-        
+
         # Create default categories
         print("Creating default categories...")
         categories_data = [
@@ -93,7 +91,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample suppliers
         print("Creating sample suppliers...")
         suppliers_data = [
@@ -130,7 +128,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample assets
         print("Creating sample assets...")
         assets_data = [
@@ -198,7 +196,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample consumables
         print("Creating sample consumables...")
         consumables_data = [
@@ -280,7 +278,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample purchase requests
         print("Creating sample purchase requests...")
         purchase_requests_data = [
@@ -315,7 +313,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample borrow records
         print("Creating sample borrow records...")
         borrow_records_data = [
@@ -343,7 +341,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample pick records
         print("Creating sample pick records...")
         pick_records_data = [
@@ -372,7 +370,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Create sample asset transfer
         print("Creating sample asset transfer...")
         asset_transfer = AssetTransfer(
@@ -387,7 +385,7 @@ def init_database():
         db.session.commit()
         print("  ✓ Created asset transfer request")
         print()
-        
+
         # Create sample operation logs
         print("Creating sample operation logs...")
         operation_logs_data = [
@@ -424,7 +422,7 @@ def init_database():
         
         db.session.commit()
         print()
-        
+
         # Display summary
         print("=" * 60)
         print("Database Initialization Summary")

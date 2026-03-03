@@ -1,33 +1,31 @@
-"""
-Simple script to test backend API endpoints
-"""
+# 测试后端 API 端点的简单脚本
 import requests
 import json
 
 BASE_URL = 'http://localhost:5000/api'
 
 print("=" * 60)
-print("Backend API Test")
+print("后端 API 测试")
 print("=" * 60)
 print()
 
-# Test 1: Health check (if available)
-print("Test 1: Checking if server is running...")
+# 测试1：健康检查（如果可用）
+print("Test 1: 检查服务器是否运行...")
 try:
     response = requests.get(f'{BASE_URL}/auth/me', timeout=2)
     print(f"Status: {response.status_code}")
 except requests.exceptions.ConnectionError:
-    print("Server is not running or not accessible")
-    print("Please start the Flask server first: python run.py")
+    print("服务器未运行或无法访问")
+    print("请先启动 Flask 服务器: python run.py")
     exit(1)
 except Exception as e:
     print(f"Error: {e}")
-    # Continue anyway, might be 401 which is expected
+    # 继续执行，可能是预期的 401 错误
 
 print()
 
-# Test 2: Login
-print("Test 2: Login with admin credentials...")
+# 测试2：登录
+print("Test 2: 使用管理员凭据登录...")
 login_data = {
     'username': 'admin',
     'password': 'admin123'
@@ -54,8 +52,8 @@ except Exception as e:
 
 print()
 
-# Test 3: Get categories
-print("Test 3: Get categories...")
+# 测试3：获取类别
+print("Test 3: 获取类别...")
 try:
     response = requests.get(f'{BASE_URL}/categories', headers=headers)
     print(f"Status: {response.status_code}")
@@ -72,8 +70,8 @@ except Exception as e:
 
 print()
 
-# Test 4: Get assets
-print("Test 4: Get assets...")
+# 测试4：获取资产
+print("Test 4: 获取资产...")
 try:
     response = requests.get(f'{BASE_URL}/assets', headers=headers)
     print(f"Status: {response.status_code}")
@@ -90,8 +88,8 @@ except Exception as e:
 
 print()
 
-# Test 5: Get consumables
-print("Test 5: Get consumables...")
+# 测试5：获取耗材
+print("Test 5: 获取耗材...")
 try:
     response = requests.get(f'{BASE_URL}/consumables', headers=headers)
     print(f"Status: {response.status_code}")
@@ -108,8 +106,8 @@ except Exception as e:
 
 print()
 
-# Test 6: Get dashboard data
-print("Test 6: Get dashboard data...")
+# 测试6：获取仪表盘数据
+print("Test 6: 获取仪表盘数据...")
 try:
     response = requests.get(f'{BASE_URL}/dashboard', headers=headers)
     print(f"Status: {response.status_code}")
@@ -127,5 +125,5 @@ except Exception as e:
 
 print()
 print("=" * 60)
-print("API Test Completed")
+print("API 测试完成")
 print("=" * 60)

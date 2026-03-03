@@ -1,15 +1,13 @@
-"""
-Initialize database using Flask-SQLAlchemy
-This ensures tables are created in the correct location for Flask
-"""
+# 使用 Flask-SQLAlchemy 初始化数据库
+# 确保表在 Flask 的正确位置创建
 import sys
 import os
 import codecs
 
-# Add backend to path
+# 将后端添加到路径
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Set UTF-8 encoding for Windows console
+# 为 Windows 控制台设置 UTF-8 编码
 if sys.platform == 'win32':
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
@@ -22,32 +20,32 @@ from app.extensions import db
 from datetime import datetime, timedelta
 
 print("=" * 60)
-print("Flask-SQLAlchemy Database Initialization")
+print("Flask-SQLAlchemy 数据库初始化")
 print("=" * 60)
 print()
 
-# Create Flask app
+# 创建 Flask 应用
 app = create_app(config['default'])
 
 with app.app_context():
-    # Get database path
+    # 获取数据库路径
     db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
     print(f"Database location: {os.path.abspath(db_path)}")
     print()
-    
-    # Drop all existing tables
+
+    # 删除所有现有表
     print("Dropping existing tables...")
     db.drop_all()
     print("✓ Existing tables dropped")
     print()
-    
-    # Create all tables
+
+    # 创建所有表
     print("Creating database tables...")
     db.create_all()
     print("✓ Database tables created successfully!")
     print()
-    
-    # Create admin user
+
+    # 创建管理员用户
     print("Creating admin user...")
     admin = User(
         username='admin',
@@ -60,8 +58,8 @@ with app.app_context():
     db.session.commit()
     print("✓ Admin user created")
     print()
-    
-    # Create test user
+
+    # 创建测试用户
     print("Creating test user...")
     test_user = User(
         username='testuser',
@@ -74,8 +72,8 @@ with app.app_context():
     db.session.commit()
     print("✓ Test user created")
     print()
-    
-    # Create default categories
+
+    # 创建默认类别
     print("Creating default categories...")
     categories_data = [
         {'name': '试剂'},
@@ -88,14 +86,14 @@ with app.app_context():
     for cat_data in categories_data:
         category = Category(name=cat_data['name'])
         db.session.add(category)
-        db.session.flush()  # Get the ID
+        db.session.flush()  # 获取 ID
         categories[cat_data['name']] = category
         print(f"  ✓ Created category: {cat_data['name']}")
-    
+
     db.session.commit()
     print()
-    
-    # Create sample suppliers
+
+    # 创建示例供应商
     print("Creating sample suppliers...")
     suppliers_data = [
         {
@@ -131,8 +129,8 @@ with app.app_context():
     
     db.session.commit()
     print()
-    
-    # Create sample assets
+
+    # 创建示例资产
     print("Creating sample assets...")
     assets_data = [
         {
@@ -196,8 +194,8 @@ with app.app_context():
     
     db.session.commit()
     print()
-    
-    # Create sample consumables
+
+    # 创建示例耗材
     print("Creating sample consumables...")
     consumables_data = [
         {
@@ -275,8 +273,8 @@ with app.app_context():
     
     db.session.commit()
     print()
-    
-    # Display summary
+
+    # 显示摘要
     print("=" * 60)
     print("Database Initialization Summary")
     print("=" * 60)

@@ -1,13 +1,11 @@
-"""
-Script to check the schema of the SQLite database
-"""
+# 检查 SQLite 数据库结构的脚本
 import sqlite3
 import os
 
 db_path = os.path.join(os.path.dirname(__file__), 'lab_asset_management.db')
 
 print("=" * 60)
-print("SQLite Database Schema Check")
+print("SQLite 数据库结构检查")
 print("=" * 60)
 print(f"Database: {os.path.abspath(db_path)}")
 print()
@@ -15,7 +13,7 @@ print()
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-# Get all tables (excluding sqlite_sequence)
+# 获取所有表（排除 sqlite_sequence）
 cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name != 'sqlite_sequence' ORDER BY name")
 tables = cursor.fetchall()
 
@@ -23,11 +21,11 @@ for table in tables:
     table_name = table[0]
     print(f"\nTable: {table_name}")
     print("-" * 60)
-    
-    # Get table schema
+
+    # 获取表结构
     cursor.execute(f"PRAGMA table_info({table_name})")
     columns = cursor.fetchall()
-    
+
     for col in columns:
         col_id, name, type_, notnull, default, pk = col
         pk_str = " [PK]" if pk else ""
@@ -37,7 +35,7 @@ for table in tables:
 
 print()
 print("=" * 60)
-print("Schema check completed!")
+print("结构检查完成！")
 print("=" * 60)
 
 conn.close()

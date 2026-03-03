@@ -152,7 +152,7 @@ const MainLayout: React.FC = () => {
         />
       </Sider>
       <Layout>
-        <Header className="layout-header">
+        <Header className="layout-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}

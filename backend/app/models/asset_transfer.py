@@ -1,12 +1,10 @@
-"""
-AssetTransfer model for managing asset location transfers
-"""
+# 资产调拨模型 - 管理资产位置调拨
 from datetime import datetime
 from app.extensions import db
 
 
 class AssetTransfer(db.Model):
-    """AssetTransfer model for asset location transfers"""
+    # 资产调拨模型 - 资产位置调拨
     __tablename__ = 'asset_transfers'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -19,14 +17,14 @@ class AssetTransfer(db.Model):
     approver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
-    # Status enum values
+
+    # 状态枚举值
     STATUS_PENDING = 'pending'
     STATUS_APPROVED = 'approved'
     STATUS_REJECTED = 'rejected'
-    
+
     def to_dict(self):
-        """Convert asset transfer to dictionary"""
+        # 将资产调拨转换为字典
         return {
             'id': self.id,
             'asset': {

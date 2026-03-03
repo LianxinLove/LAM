@@ -1,23 +1,21 @@
-"""
-Database initialization script
-Creates the database tables and initial data
-"""
+# 数据库初始化脚本
+# 创建数据库表和初始数据
 from app import create_app
 from app.config import config
 from app.models import User, Category, Supplier
 from app.extensions import db
 
 def init_database():
-    """Initialize the database with tables and initial data"""
+    # 使用表和初始数据初始化数据库
     app = create_app(config['default'])
-    
+
     with app.app_context():
-        # Create all tables
+        # 创建所有表
         print("Creating database tables...")
         db.create_all()
         print("Database tables created successfully!")
-        
-        # Check if admin user exists
+
+        # 检查管理员用户是否存在
         admin = User.query.filter_by(username='admin').first()
         if not admin:
             print("Creating admin user...")
@@ -35,8 +33,8 @@ def init_database():
             print("Password: admin123")
         else:
             print("Admin user already exists.")
-        
-        # Create default categories
+
+        # 创建默认类别
         default_categories = ['试剂', '耗材', '仪器', '其他']
         for cat_name in default_categories:
             category = Category.query.filter_by(name=cat_name).first()
@@ -44,11 +42,11 @@ def init_database():
                 print(f"Creating category: {cat_name}")
                 category = Category(name=cat_name)
                 db.session.add(category)
-        
+
         db.session.commit()
         print("Default categories created successfully!")
-        
-        # Create a sample supplier
+
+        # 创建示例供应商
         supplier = Supplier.query.filter_by(name='示例供应商').first()
         if not supplier:
             print("Creating sample supplier...")
@@ -62,7 +60,7 @@ def init_database():
             db.session.add(supplier)
             db.session.commit()
             print("Sample supplier created successfully!")
-        
+
         print("\nDatabase initialization completed!")
         print("\nYou can now start the application with: python run.py")
 

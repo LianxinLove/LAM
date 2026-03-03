@@ -1,248 +1,547 @@
-// User Types
+/**
+ * 全局类型定义
+ *
+ * 说明：
+ * - 定义系统中使用的所有 TypeScript 接口和类型
+ * - 与后端 API 数据结构保持一致
+ * - 使用严格的类型检查提高代码可靠性
+ */
+
+// ==================== 用户认证类型 ====================
+
+/**
+ * 用户信息
+ */
 export interface User {
+  /** 用户 ID */
   id: number;
+  /** 用户名 */
   username: string;
+  /** 电子邮箱（可选） */
   email?: string;
+  /** 是否为超级用户（管理员） */
   is_superuser: boolean;
 }
 
+/**
+ * 登录请求
+ */
 export interface LoginRequest {
+  /** 用户名 */
   username: string;
+  /** 密码 */
   password: string;
 }
 
+/**
+ * 注册请求
+ */
 export interface RegisterRequest {
+  /** 用户名 */
   username: string;
+  /** 密码 */
   password: string;
+  /** 电子邮箱（可选） */
   email?: string;
 }
 
+/**
+ * 认证响应
+ *
+ * 后端登录/注册成功后返回的数据
+ *
+ * 认证方式：Session-Cookie
+ * - Session ID 通过 Cookie 返回，由浏览器自动管理
+ * - 不需要在响应中包含 token
+ */
 export interface AuthResponse {
+  /** 用户 ID */
   user_id: number;
+  /** 用户名 */
   username: string;
+  /** 是否为管理员 */
   is_superuser: boolean;
-  token: string;
 }
 
-// Asset Types
+// ==================== 资产相关类型 ====================
+
+/**
+ * 资产类别
+ *
+ * 支持树形结构，通过 parent 字段关联父类别
+ */
 export interface Category {
+  /** 类别 ID */
   id: number;
+  /** 类别名称 */
   name: string;
+  /** 父类别（可选，用于构建层级结构） */
   parent?: Category;
+  /** 创建时间 */
   created_at: string;
 }
 
+/**
+ * 供应商信息
+ */
 export interface Supplier {
+  /** 供应商 ID */
   id: number;
+  /** 供应商名称 */
   name: string;
+  /** 联系人 */
   contact?: string;
+  /** 联系电话 */
   phone?: string;
+  /** 电子邮箱 */
   email?: string;
+  /** 地址 */
   address?: string;
+  /** 创建时间 */
   created_at: string;
 }
 
+/**
+ * 资产信息
+ */
 export interface Asset {
+  /** 资产 ID */
   id: number;
+  /** 资产名称 */
   name: string;
+  /** 资产编号（唯一） */
   code: string;
+  /** 所属类别 */
   category: Category;
+  /** 供应商（可选） */
   supplier?: Supplier;
+  /** 规格说明 */
   specifications?: string;
+  /** 采购日期（ISO 8601 格式） */
   purchase_date?: string;
+  /** 采购价格 */
   purchase_price?: number;
-  status: 'available' | 'in_use' | 'maintenance' | 'retired';
+  /** 资产状态 */
+  status: AssetStatus;
+  /** 存放位置 */
   location?: string;
-  custodian?: string;  // Custodian name as string
+  /** 保管人（姓名字符串） */
+  custodian?: string;
+  /** 备注 */
   remarks?: string;
+  /** 创建时间 */
   created_at: string;
+  /** 更新时间 */
   updated_at: string;
 }
 
+/**
+ * 资产状态枚举
+ */
+export type AssetStatus = 'available' | 'in_use' | 'maintenance' | 'retired';
+
+/**
+ * 资产表单数据
+ *
+ * 用于创建和更新资产
+ */
 export interface AssetFormData {
+  /** 资产名称（必填） */
   name: string;
+  /** 资产编号（必填） */
   code: string;
+  /** 类别 ID（必填） */
   category_id: number;
+  /** 供应商 ID（可选） */
   supplier_id?: number;
+  /** 规格说明 */
   specifications?: string;
+  /** 采购日期（YYYY-MM-DD 格式） */
   purchase_date?: string;
+  /** 采购价格 */
   purchase_price?: number;
+  /** 存放位置 */
   location?: string;
-  custodian?: string;  // Custodian name as string
+  /** 保管人姓名 */
+  custodian?: string;
+  /** 备注 */
   remarks?: string;
 }
 
-// Consumable Types
+// ==================== 耗材相关类型 ====================
+
+/**
+ * 耗材信息
+ */
 export interface Consumable {
+  /** 耗材 ID */
   id: number;
+  /** 耗材名称 */
   name: string;
+  /** 耗材编号 */
   code: string;
+  /** 所属类别 */
   category: Category;
+  /** 供应商（可选） */
   supplier?: Supplier;
+  /** 计量单位 */
   unit: string;
+  /** 当前库存数量 */
   stock: number;
+  /** 最低库存警戒线 */
   min_stock: number;
+  /** 单价 */
   price?: number;
+  /** 存放位置 */
   location?: string;
+  /** 是否低库存（库存 < 最低库存） */
   is_low_stock?: boolean;
+  /** 创建时间 */
   created_at: string;
+  /** 更新时间 */
   updated_at: string;
 }
 
+/**
+ * 耗材表单数据
+ *
+ * 用于创建和更新耗材
+ */
 export interface ConsumableFormData {
+  /** 耗材名称（必填） */
   name: string;
+  /** 类别 ID（必填） */
   category_id: number;
+  /** 供应商 ID（可选） */
   supplier_id?: number;
+  /** 计量单位（必填） */
   unit: string;
+  /** 初始库存（必填） */
   stock: number;
+  /** 最低库存（必填） */
   min_stock: number;
+  /** 单价 */
   price?: number;
+  /** 存放位置 */
   location?: string;
 }
 
-// Purchase Request Types
+// ==================== 采购申请类型 ====================
+
+/**
+ * 采购申请状态
+ */
+export type PurchaseStatus = 'pending' | 'approved' | 'purchased' | 'rejected';
+
+/**
+ * 采购申请信息
+ */
 export interface PurchaseRequest {
+  /** 申请 ID */
   id: number;
+  /** 申请标题 */
   title: string;
+  /** 申请人 */
   applicant: User;
+  /** 物品名称 */
   item_name: string;
+  /** 数量 */
   quantity: number;
+  /** 预算价格 */
   estimated_price: number;
+  /** 供应商（可选） */
   supplier?: Supplier;
+  /** 采购原因 */
   reason: string;
-  status: 'pending' | 'approved' | 'purchased' | 'rejected';
+  /** 申请状态 */
+  status: PurchaseStatus;
+  /** 审批人（可选） */
   approver?: User;
+  /** 审批时间（可选） */
   approved_at?: string;
+  /** 创建时间 */
   created_at: string;
 }
 
+/**
+ * 采购申请表单数据
+ */
 export interface PurchaseFormData {
+  /** 申请标题（必填） */
   title: string;
+  /** 物品名称（必填） */
   item_name: string;
+  /** 数量（必填） */
   quantity: number;
+  /** 预算价格（必填） */
   estimated_price: number;
+  /** 供应商 ID（可选） */
   supplier_id?: number;
+  /** 采购原因（必填） */
   reason: string;
 }
 
-// Borrow Record Types
+// ==================== 资产借用类型 ====================
+
+/**
+ * 借用记录状态
+ */
+export type BorrowStatus = 'borrowed' | 'returned';
+
+/**
+ * 资产借用记录
+ */
 export interface BorrowRecord {
+  /** 借用记录 ID */
   id: number;
+  /** 被借用的资产 */
   asset: Asset;
+  /** 借用人 */
   borrower: User;
+  /** 借用日期 */
   borrow_date: string;
+  /** 归还日期（已归还时） */
   return_date?: string;
+  /** 用途说明 */
   purpose?: string;
-  status: 'borrowed' | 'returned';
+  /** 借用状态 */
+  status: BorrowStatus;
 }
 
+/**
+ * 借用表单数据
+ */
 export interface BorrowFormData {
+  /** 资产 ID（必填） */
   asset_id: number;
+  /** 用途说明（可选） */
   purpose?: string;
 }
 
-// Pick Record Types
+// ==================== 耗材领用类型 ====================
+
+/**
+ * 领用申请状态
+ */
+export type PickStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * 耗材领用记录
+ */
 export interface PickRecord {
+  /** 领用记录 ID */
   id: number;
+  /** 领用的耗材 */
   item: Consumable;
+  /** 领用人 */
   picker: User;
+  /** 领用数量 */
   quantity: number;
+  /** 用途说明 */
   purpose?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  /** 申请状态 */
+  status: PickStatus;
+  /** 审批人（可选） */
   approver?: User;
+  /** 审批时间（可选） */
   approved_at?: string;
+  /** 创建时间 */
   created_at: string;
 }
 
+/**
+ * 领用表单数据
+ */
 export interface PickFormData {
+  /** 耗材 ID（必填） */
   item_id: number;
+  /** 领用数量（必填） */
   quantity: number;
+  /** 用途说明（可选） */
   purpose?: string;
 }
 
-// Transfer Request Types
+// ==================== 资产调拨类型 ====================
+
+/**
+ * 调拨申请状态
+ */
+export type TransferStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * 资产调拨申请
+ */
 export interface TransferRequest {
+  /** 调拨申请 ID */
   id: number;
+  /** 调拨的资产 */
   asset: Asset;
+  /** 原位置 */
   from_location: string;
+  /** 目标位置 */
   to_location: string;
+  /** 调拨原因 */
   reason: string;
+  /** 申请人 */
   applicant: User;
-  status: 'pending' | 'approved' | 'rejected';
+  /** 申请状态 */
+  status: TransferStatus;
+  /** 审批人（可选） */
   approver?: User;
+  /** 审批时间（可选） */
   approved_at?: string;
+  /** 创建时间 */
   created_at: string;
 }
 
+/**
+ * 调拨表单数据
+ */
 export interface TransferFormData {
+  /** 资产 ID（必填） */
   asset_id: number;
+  /** 目标位置（必填） */
   to_location: string;
+  /** 调拨原因（必填） */
   reason: string;
 }
 
-// Operation Log Types
+// ==================== 操作日志类型 ====================
+
+/**
+ * 操作日志
+ */
 export interface OperationLog {
+  /** 日志 ID */
   id: number;
+  /** 操作用户 */
   user: User;
+  /** 操作类型（create/update/delete 等） */
   action: string;
+  /** 操作的数据模型 */
   model: string;
+  /** 操作对象的 ID */
   object_id: number;
+  /** 操作对象的字符串表示 */
   object_repr: string;
+  /** 详细信息（可选） */
   details?: string;
+  /** 操作时间 */
   timestamp: string;
 }
 
-// Dashboard Types
+// ==================== 仪表盘类型 ====================
+
+/**
+ * 仪表盘统计数据
+ */
 export interface DashboardData {
+  /** 资产总数 */
   asset_count: number;
+  /** 耗材总数 */
   consumable_count: number;
+  /** 我的借用数量 */
   my_borrows: number;
+  /** 我的申请数量 */
   my_requests: number;
+  /** 低库存耗材列表 */
   low_stock_items: Consumable[];
+  /** 待审批采购数（管理员） */
   pending_purchases?: number;
+  /** 待审批调拨数（管理员） */
   pending_transfers?: number;
+  /** 待审批领用数（管理员） */
   pending_picks?: number;
 }
 
-// Statistics Types
+// ==================== 统计分析类型 ====================
+
+/**
+ * 统计分析数据
+ */
 export interface StatisticsData {
+  /** 按状态统计的资产数量 */
   asset_by_status: Array<{ status: string; count: number }>;
+  /** 按类别统计的资产数量 */
   asset_by_category: Array<{ category: string; count: number }>;
+  /** 耗材总价值 */
   total_consumable_value: number;
+  /** 低库存耗材数量 */
   low_stock_count: number;
+  /** 按状态统计的采购申请数量 */
   purchase_by_status: Array<{ status: string; count: number }>;
+  /** 总预算金额 */
   total_budget: number;
+  /** 当前借用中的资产数量 */
   active_borrows: number;
 }
 
-// API Response Types
+// ==================== API 响应类型 ====================
+
+/**
+ * 通用 API 响应
+ *
+ * @template T - 响应数据的类型
+ */
 export interface ApiResponse<T> {
+  /** 请求是否成功 */
   success: boolean;
+  /** 响应消息 */
   message: string;
+  /** 响应数据 */
   data: T;
 }
 
+/**
+ * 分页响应数据
+ *
+ * @template T - 列表项的类型
+ */
 export interface PaginatedResponse<T> {
+  /** 数据列表 */
   items: T[];
+  /** 总记录数 */
   total: number;
+  /** 当前页码 */
   page: number;
+  /** 每页数量 */
   page_size: number;
 }
 
+/**
+ * API 错误响应
+ */
 export interface ApiError {
+  /** 请求是否失败（固定为 false） */
   success: false;
+  /** 错误消息 */
   message: string;
+  /** 错误代码（可选） */
   error_code?: string;
+  /** 错误详情（可选） */
   details?: any;
 }
 
-// Query Params Types
+// ==================== 查询参数类型 ====================
+
+/**
+ * 通用查询参数
+ *
+ * 用于列表 API 的筛选和分页
+ */
 export interface QueryParams {
+  /** 页码（从 1 开始） */
   page?: number;
+  /** 每页数量 */
   page_size?: number;
+  /** 按类别筛选 */
   category_id?: number;
+  /** 按状态筛选 */
   status?: string;
+  /** 仅显示低库存项目（耗材） */
   low_stock?: boolean;
+  /** 仅显示当前用户的记录 */
   my?: boolean;
+  /** 按申请人筛选 */
   applicant_id?: number;
 }

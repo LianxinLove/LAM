@@ -1,12 +1,10 @@
-"""
-OperationLog model for tracking system operations
-"""
+# 操作日志模型 - 跟踪系统操作
 from datetime import datetime
 from app.extensions import db
 
 
 class OperationLog(db.Model):
-    """OperationLog model for tracking system operations"""
+    # 操作日志模型 - 跟踪系统操作
     __tablename__ = 'operation_logs'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -17,9 +15,9 @@ class OperationLog(db.Model):
     object_repr = db.Column(db.String(200), nullable=False)
     details = db.Column(db.Text, nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
-    
+
     def to_dict(self):
-        """Convert operation log to dictionary"""
+        # 将操作日志转换为字典
         return {
             'id': self.id,
             'user': {

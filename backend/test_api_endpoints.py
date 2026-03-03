@@ -1,9 +1,7 @@
-"""
-Test backend API endpoints with authentication
-"""
+# 测试后端 API 端点（带认证）
 import json
 
-# Token from login
+# 从登录获取的 token
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3MjUwMzkxMiwianRpIjoiYmFjMDYyNjktNTE0ZS00YjY5LTgwYzctYTA4ZDQ3MWEzYmZmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNzcyNTAzOTEyLCJleHAiOjE3NzI1OTAzMTJ9.vJHdNmzvcfJZ19GyW7pzjIhElHg3KOvBooe0ZcoJSvU"
 
 headers = {
@@ -16,11 +14,11 @@ import requests
 BASE_URL = 'http://localhost:5000/api'
 
 print("=" * 60)
-print("Backend API Endpoint Tests")
+print("后端 API 端点测试")
 print("=" * 60)
 print()
 
-# Test 1: Get categories
+# 测试1：获取类别
 print("Test 1: GET /api/categories")
 try:
     response = requests.get(f'{BASE_URL}/categories', headers=headers)
@@ -37,7 +35,7 @@ except Exception as e:
     print(f"Error: {e}")
 print()
 
-# Test 2: Get assets
+# 测试2：获取资产
 print("Test 2: GET /api/assets")
 try:
     response = requests.get(f'{BASE_URL}/assets', headers=headers)
@@ -54,7 +52,7 @@ except Exception as e:
     print(f"Error: {e}")
 print()
 
-# Test 3: Get consumables
+# 测试3：获取耗材
 print("Test 3: GET /api/consumables")
 try:
     response = requests.get(f'{BASE_URL}/consumables', headers=headers)
@@ -71,7 +69,7 @@ except Exception as e:
     print(f"Error: {e}")
 print()
 
-# Test 4: Get dashboard
+# 测试4：获取仪表盘
 print("Test 4: GET /api/dashboard")
 try:
     response = requests.get(f'{BASE_URL}/dashboard', headers=headers)
@@ -89,7 +87,7 @@ except Exception as e:
     print(f"Error: {e}")
 print()
 
-# Test 5: Get suppliers
+# 测试5：获取供应商
 print("Test 5: GET /api/suppliers")
 try:
     response = requests.get(f'{BASE_URL}/suppliers', headers=headers)
@@ -107,5 +105,5 @@ except Exception as e:
 print()
 
 print("=" * 60)
-print("API Endpoint Tests Completed")
+print("API 端点测试完成")
 print("=" * 60)

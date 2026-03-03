@@ -1,13 +1,11 @@
-"""
-PurchaseRequest model for managing purchase applications
-"""
+# 采购申请模型 - 管理采购申请
 from datetime import datetime
 from decimal import Decimal
 from app.extensions import db
 
 
 class PurchaseRequest(db.Model):
-    """PurchaseRequest model for purchase applications"""
+    # 采购申请模型 - 采购申请
     __tablename__ = 'purchase_requests'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -22,15 +20,15 @@ class PurchaseRequest(db.Model):
     approver_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
-    # Status enum values
+
+    # 状态枚举值
     STATUS_PENDING = 'pending'
     STATUS_APPROVED = 'approved'
     STATUS_PURCHASED = 'purchased'
     STATUS_REJECTED = 'rejected'
-    
+
     def to_dict(self):
-        """Convert purchase request to dictionary"""
+        # 将采购申请转换为字典
         return {
             'id': self.id,
             'title': self.title,

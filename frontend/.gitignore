@@ -7,10 +7,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
-*.local
+
+# Local env files - 本地环境变量文件不提交
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*

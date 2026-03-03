@@ -1,13 +1,11 @@
-"""
-Standalone SQLite database creation script for Lab Asset Management System
-Creates the SQLite database with all tables and initial data without requiring Flask
-"""
+# 实验室资产管理系统 - 独立 SQLite 数据库创建脚本
+# 创建包含所有表和初始数据的 SQLite 数据库（无需 Flask）
 import sqlite3
 import os
 import sys
 from datetime import datetime, timedelta
 
-# Set UTF-8 encoding for Windows console
+# 为 Windows 控制台设置 UTF-8 编码
 if sys.platform == 'win32':
     import codecs
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
@@ -15,32 +13,32 @@ if sys.platform == 'win32':
 
 
 def create_database():
-    """Create SQLite database with all tables and initial data"""
+    # 创建包含所有表和初始数据的 SQLite 数据库
     print("=" * 60)
     print("Lab Asset Management System - SQLite Database Creation")
     print("=" * 60)
     print()
-    
-    # Database file path
+
+    # 数据库文件路径
     db_path = os.path.join(os.path.dirname(__file__), 'lab_asset_management.db')
     print(f"Database location: {os.path.abspath(db_path)}")
     print()
-    
-    # Remove existing database if it exists
+
+    # 如果数据库已存在则删除
     if os.path.exists(db_path):
         print("Removing existing database...")
         os.remove(db_path)
         print("[OK] Existing database removed")
         print()
-    
-    # Create database connection
+
+    # 创建数据库连接
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
-    # Enable foreign keys
+
+    # 启用外键
     cursor.execute("PRAGMA foreign_keys = ON")
-    
-    # Create tables
+
+    # 创建表
     print("Creating database tables...")
     
     # Users table
@@ -221,10 +219,10 @@ def create_database():
     ''')
     print("  [OK] Created table: operation_logs")
     print()
-    
+
     # Insert initial data
     print("Inserting initial data...")
-    
+
     # Insert users (password hashes are for 'admin123' and 'test123')
     # Note: In production, use proper password hashing
     cursor.execute('''
@@ -363,21 +361,21 @@ def create_database():
     
     # Commit all changes
     conn.commit()
-    
+
     # Display summary
     print("=" * 60)
     print("Database Creation Summary")
     print("=" * 60)
-    
-    tables = ['users', 'categories', 'suppliers', 'assets', 'consumables', 
-              'purchase_requests', 'asset_transfers', 'borrow_records', 
+
+    tables = ['users', 'categories', 'suppliers', 'assets', 'consumables',
+              'purchase_requests', 'asset_transfers', 'borrow_records',
               'pick_records', 'operation_logs']
-    
+
     for table in tables:
         cursor.execute(f"SELECT COUNT(*) FROM {table}")
         count = cursor.fetchone()[0]
         print(f"[OK] {table}: {count}")
-    
+
     print()
     print("=" * 60)
     print("Database created successfully!")
@@ -392,7 +390,7 @@ def create_database():
     print("Note: Passwords are stored as simple hashes for testing.")
     print("In production, use proper password hashing (bcrypt, etc.)")
     print()
-    
+
     # Close connection
     conn.close()
 

@@ -1,0 +1,60 @@
+# 实验室资产管理系统 - Docker Compose 配置
+# 用于一键启动前后端服务
+
+services:
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lab-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      # 挂载数据目录用于数据库持久化
+      - backend-data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:///app/data/lab_asset_management.db
+    networks:
+      - lab-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # 前端访问后端 API 的地址
+        - VITE_API_BASE_URL=http://localhost:5000/api
+    container_name: lab-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - lab-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+# 数据卷
+volumes:
+  backend-data:
+    driver: local
+
+# 网络
+networks:
+  lab-network:
+    driver: bridge

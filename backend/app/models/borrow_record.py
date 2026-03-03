@@ -1,12 +1,10 @@
-"""
-BorrowRecord model for managing asset borrowing and returning
-"""
+# 借用记录模型 - 管理资产借用和归还
 from datetime import datetime
 from app.extensions import db
 
 
 class BorrowRecord(db.Model):
-    """BorrowRecord model for asset borrowing and returning"""
+    # 借用记录模型 - 资产借用和归还
     __tablename__ = 'borrow_records'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -16,13 +14,13 @@ class BorrowRecord(db.Model):
     return_date = db.Column(db.DateTime, nullable=True)
     purpose = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), nullable=False, default='borrowed', index=True)
-    
-    # Status enum values
+
+    # 状态枚举值
     STATUS_BORROWED = 'borrowed'
     STATUS_RETURNED = 'returned'
-    
+
     def to_dict(self):
-        """Convert borrow record to dictionary"""
+        # 将借用记录转换为字典
         return {
             'id': self.id,
             'asset': {

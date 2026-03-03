@@ -1,26 +1,24 @@
-"""
-Category model for asset classification
-"""
+# 类别模型 - 资产分类
 from datetime import datetime
 from app.extensions import db
 
 
 class Category(db.Model):
-    """Category model for organizing assets and consumables"""
+    # 类别模型 - 组织资产和耗材
     __tablename__ = 'categories'
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     parent_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
-    # Relationships
+
+    # 关系定义
     parent = db.relationship('Category', remote_side=[id], backref='children')
     assets = db.relationship('Asset', backref='category', lazy='dynamic')
     consumables = db.relationship('Consumable', backref='category', lazy='dynamic')
-    
+
     def to_dict(self):
-        """Convert category to dictionary"""
+        # 将类别转换为字典
         return {
             'id': self.id,
             'name': self.name,
