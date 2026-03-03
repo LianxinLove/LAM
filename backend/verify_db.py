@@ -1,0 +1,36 @@
+"""
+Simple script to verify the SQLite database was created correctly
+"""
+import sqlite3
+import os
+
+db_path = os.path.join(os.path.dirname(__file__), 'lab_asset_management.db')
+
+print("=" * 60)
+print("SQLite Database Verification")
+print("=" * 60)
+print(f"Database: {os.path.abspath(db_path)}")
+print()
+
+conn = sqlite3.connect(db_path)
+cursor = conn.cursor()
+
+# Get all tables
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
+tables = cursor.fetchall()
+
+print(f"Total tables: {len(tables)}")
+print()
+
+for table in tables:
+    table_name = table[0]
+    cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+    count = cursor.fetchone()[0]
+    print(f"  {table_name}: {count} records")
+
+print()
+print("=" * 60)
+print("Database verification completed successfully!")
+print("=" * 60)
+
+conn.close()
