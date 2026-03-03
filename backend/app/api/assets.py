@@ -4,7 +4,11 @@ from datetime import datetime
 from app.models import Asset, Category, Supplier
 from app.utils.decorators import login_required, admin_required
 from app.utils.response import success_response, error_response, paginated_response
-from app.utils.validators import validate_required_fields, validate_pagination
+from app.utils.validators import (
+    validate_required_fields,
+    validate_pagination,
+    validate_price_field
+)
 
 
 def parse_date(date_string):
@@ -72,6 +76,13 @@ def create_asset():
     if not is_valid:
         return error_response(error_msg, error_code='VALIDATION_ERROR')
 
+    # 验证采购价格（如果提供）
+    purchase_price = None
+    if 'purchase_price' in data and data['purchase_price'] is not None:
+        is_valid, error_msg, purchase_price = validate_price_field(data, 'purchase_price', required=False)
+        if not is_valid:
+            return error_response(error_msg, error_code='VALIDATION_ERROR')
+
     # 检查编码是否已存在
     if Asset.query.filter_by(code=data['code']).first():
         return error_response('资产编码已存在', error_code='DUPLICATE_ENTRY')
@@ -99,7 +110,7 @@ def create_asset():
         supplier_id=data.get('supplier_id'),
         specifications=data.get('specifications'),
         purchase_date=parse_date(data.get('purchase_date')),
-        purchase_price=data.get('purchase_price'),
+        purchase_price=purchase_price,
         status=data.get('status', 'available'),
         location=data.get('location'),
         custodian=custodian,
@@ -161,7 +172,13 @@ def update_asset(asset_id):
     if 'purchase_date' in data:
         asset.purchase_date = parse_date(data['purchase_date'])
     if 'purchase_price' in data:
-        asset.purchase_price = data['purchase_price']
+        if data['purchase_price'] is not None:
+            is_valid, error_msg, purchase_price = validate_price_field(data, 'purchase_price', required=False)
+            if not is_valid:
+                return error_response(error_msg, error_code='VALIDATION_ERROR')
+            asset.purchase_price = purchase_price
+        else:
+            asset.purchase_price = None
     if 'status' in data:
         asset.status = data['status']
     if 'location' in data:

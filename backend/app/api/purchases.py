@@ -4,7 +4,12 @@ from datetime import datetime
 from app.models import PurchaseRequest, Supplier
 from app.utils.decorators import login_required, admin_required
 from app.utils.response import success_response, error_response, paginated_response
-from app.utils.validators import validate_required_fields, validate_pagination
+from app.utils.validators import (
+    validate_required_fields,
+    validate_pagination,
+    validate_quantity_field,
+    validate_price_field
+)
 
 purchases_bp = Blueprint('purchases', __name__)
 
@@ -67,6 +72,16 @@ def create_purchase():
     if not is_valid:
         return error_response(error_msg, error_code='VALIDATION_ERROR')
 
+    # 验证数量字段（必须为正整数）
+    is_valid, error_msg, quantity = validate_quantity_field(data, 'quantity', required=True)
+    if not is_valid:
+        return error_response(error_msg, error_code='VALIDATION_ERROR')
+
+    # 验证预算金额字段
+    is_valid, error_msg, estimated_price = validate_price_field(data, 'estimated_price', required=True)
+    if not is_valid:
+        return error_response(error_msg, error_code='VALIDATION_ERROR')
+
     # 检查供应商是否存在（如果提供）
     supplier = None
     if data.get('supplier_id'):
@@ -83,8 +98,8 @@ def create_purchase():
         title=data['title'],
         applicant_id=user_id,
         item_name=data['item_name'],
-        quantity=data['quantity'],
-        estimated_price=data['estimated_price'],
+        quantity=quantity,
+        estimated_price=estimated_price,
         supplier_id=data.get('supplier_id'),
         reason=data['reason'],
         status='pending'

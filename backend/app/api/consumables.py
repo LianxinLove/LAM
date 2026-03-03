@@ -3,7 +3,13 @@ from flask import Blueprint, request
 from app.models import Consumable, Category, Supplier
 from app.utils.decorators import login_required, admin_required
 from app.utils.response import success_response, error_response, paginated_response
-from app.utils.validators import validate_required_fields, validate_pagination
+from app.utils.validators import (
+    validate_required_fields,
+    validate_pagination,
+    validate_stock_fields,
+    validate_price_field,
+    validate_positive_integer
+)
 
 consumables_bp = Blueprint('consumables', __name__)
 
@@ -61,6 +67,16 @@ def create_consumable():
     if not is_valid:
         return error_response(error_msg, error_code='VALIDATION_ERROR')
 
+    # 验证库存字段
+    is_valid, error_msg = validate_stock_fields(data)
+    if not is_valid:
+        return error_response(error_msg, error_code='VALIDATION_ERROR')
+
+    # 验证价格字段
+    is_valid, error_msg, price = validate_price_field(data, 'price', required=False)
+    if not is_valid:
+        return error_response(error_msg, error_code='VALIDATION_ERROR')
+
     # 检查类别是否存在
     category = Category.query.get(data['category_id'])
     if not category:
@@ -91,10 +107,10 @@ def create_consumable():
         unit=data.get('unit', '个'),
         stock=data.get('stock', 0),
         min_stock=data.get('min_stock', 10),
-        price=data.get('price'),
+        price=price,
         location=data.get('location')
     )
-    
+
     try:
         db.session.add(consumable)
         db.session.commit()
@@ -128,6 +144,18 @@ def update_consumable(consumable_id):
 
     data = request.get_json()
 
+    # 验证库存字段（如果提供）
+    is_valid, error_msg = validate_stock_fields(data)
+    if not is_valid:
+        return error_response(error_msg, error_code='VALIDATION_ERROR')
+
+    # 验证价格字段（如果提供）
+    if 'price' in data:
+        is_valid, error_msg, price = validate_price_field(data, 'price', required=False)
+        if not is_valid:
+            return error_response(error_msg, error_code='VALIDATION_ERROR')
+        consumable.price = price
+
     # 更新字段
     if 'name' in data:
         consumable.name = data['name']
@@ -145,14 +173,22 @@ def update_consumable(consumable_id):
     if 'unit' in data:
         consumable.unit = data['unit']
     if 'stock' in data:
-        consumable.stock = data['stock']
+        is_valid, error_msg, validated_stock = validate_positive_integer(
+            data['stock'], '当前库存', allow_zero=True
+        )
+        if not is_valid:
+            return error_response(error_msg, error_code='VALIDATION_ERROR')
+        consumable.stock = validated_stock
     if 'min_stock' in data:
-        consumable.min_stock = data['min_stock']
-    if 'price' in data:
-        consumable.price = data['price']
+        is_valid, error_msg, validated_min_stock = validate_positive_integer(
+            data['min_stock'], '最低库存', allow_zero=True
+        )
+        if not is_valid:
+            return error_response(error_msg, error_code='VALIDATION_ERROR')
+        consumable.min_stock = validated_min_stock
     if 'location' in data:
         consumable.location = data['location']
-    
+
     try:
         from app.extensions import db
         db.session.commit()
