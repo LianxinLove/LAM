@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(python:*)",
+      "Bash(npm run:*)",
+      "Bash(pip install:*)",
+      "Bash(npm install:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(docker --version)",
+      "Bash(docker-compose --version)",
+      "Bash(docker-compose config)",
+      "Bash(docker-compose -f docker-compose-prod.yml config)",
+      "Bash(docker-compose build --no-cache)",
+      "Bash(docker pull alpine:latest)",
+      "Bash(docker-compose build)",
+      "Bash(docker pull python:3.11-slim)",
+      "Bash(docker pull node:20-alpine)",
+      "Bash(docker pull nginx:alpine)",
+      "Bash(docker-compose down)",
+      "Bash(docker-compose build frontend)",
+      "Bash(docker-compose up -d)",
+      "Bash(docker-compose build backend)",
+      "Bash(docker exec lab-frontend ls -la /usr/share/nginx/html/js/)",
+      "Bash(docker exec lab-frontend sh -c \"ls -la /usr/share/nginx/html/js/\")",
+      "Bash(docker exec lab-backend sh -c \"ls -la /app/data/ 2>&1; whoami; id\")",
+      "Bash(docker exec lab-backend sh -c \"flask db upgrade 2>&1\")"
+    ]
+  }
+}

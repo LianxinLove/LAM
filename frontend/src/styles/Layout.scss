@@ -9,6 +9,13 @@
   padding: 0 24px;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: background 0.3s ease;
+}
+
+// 暗色主题样式
+[data-theme='dark'] .layout-header {
+  background: var(--background-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .layout-logo {
@@ -31,12 +38,24 @@
   background: #fff;
   border-radius: 8px;
   min-height: calc(100vh - 165px);
+  transition: background 0.3s ease;
+}
+
+// 暗色主题样式
+[data-theme='dark'] .layout-content {
+  background: var(--background-color-light);
 }
 
 .layout-footer {
   text-align: center;
   color: #666;
   padding: 16px;
+  transition: color 0.3s ease;
+}
+
+// 暗色主题样式
+[data-theme='dark'] .layout-footer {
+  color: var(--text-secondary);
 }
 
 // 响应式设计

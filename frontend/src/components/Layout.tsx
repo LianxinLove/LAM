@@ -15,10 +15,13 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   QuestionCircleOutlined,
-  HistoryOutlined
+  HistoryOutlined,
+  SunOutlined,
+  MoonOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import '../styles/Layout.scss';
 
 const { Header, Sider, Content } = Layout;
@@ -28,6 +31,7 @@ const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -160,7 +164,14 @@ const MainLayout: React.FC = () => {
             style={{ fontSize: '16px', width: 64, height: 64 }}
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ color: '#666' }}>
+            <Button
+              type="text"
+              icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+              onClick={toggleTheme}
+              style={{ fontSize: '16px', width: 48, height: 48 }}
+              title={theme === 'dark' ? '切换到亮色主题' : '切换到暗色主题'}
+            />
+            <span style={{ color: theme === 'dark' ? 'var(--text-secondary)' : '#666' }}>
               欢迎, {user?.username}
               {isAdmin && <span style={{ marginLeft: 8, color: '#1890ff' }}>(管理员)</span>}
             </span>

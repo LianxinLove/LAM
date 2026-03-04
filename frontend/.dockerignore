@@ -28,9 +28,7 @@ dist-ssr/
 .gitignore
 
 # Docker
-Dockerfile
-.dockerignore
-nginx.conf
+# 注意：Dockerfile 和 nginx.conf 需要保留用于构建
 
 # 测试覆盖率
 coverage/

@@ -62,12 +62,25 @@ class Config:
 
     # 数据库连接 URI
     # 技术要点：
-    # - 使用绝对路径避免工作目录问题
+    # - Docker 环境使用 /app/data 目录（通过 volume 持久化）
+    # - 本地开发使用项目根目录
     # - 生产环境应使用 PostgreSQL 或 MySQL
     # - SQLite 适用于开发和测试
-    _basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        f'sqlite:///{os.path.join(_basedir, "lab_asset_management.db")}'
+    # - SQLite 在多线程环境需要特殊配置
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL:
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    else:
+        # Docker 环境检测
+        if os.path.exists('/app/data'):
+            # 使用绝对路径格式：sqlite:////path
+            # Flask-SQLAlchemy 会自动在路径前添加 instance/
+            # 所以需要使用相对路径从 instance 文件夹指向 data 目录
+            SQLALCHEMY_DATABASE_URI = 'sqlite:///../../data/lab_asset_management.db?check_same_thread=False'
+        else:
+            _basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+            db_path = os.path.join(_basedir, 'lab_asset_management.db')
+            SQLALCHEMY_DATABASE_URI = f'sqlite:///{db_path}?check_same_thread=False'
 
     # 禁用修改事件追踪
     # 技术要点：
@@ -86,7 +99,7 @@ class Config:
     # - 开发环境可使用 localhost
     # - 支持 credentials 时不能使用 '*'
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS',
-                                  'http://localhost:5173,http://localhost:5174,http://localhost:3000').split(',')
+                                  'http://localhost,http://localhost:5173,http://localhost:5174,http://localhost:3000').split(',')
 
     # 是否支持跨域携带凭证（Cookie）
     # 技术要点：
