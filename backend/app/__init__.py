@@ -46,6 +46,22 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # ========== 确保必要的目录存在 ==========
+    import os
+
+    # 确保会话目录存在
+    session_dir = app.config.get('SESSION_FILE_DIR')
+    if session_dir and not os.path.exists(session_dir):
+        os.makedirs(session_dir, exist_ok=True)
+
+    # 确保数据库目录存在
+    db_path = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    if db_path.startswith('sqlite:///'):
+        db_file = db_path.replace('sqlite:///', '')
+        db_dir = os.path.dirname(db_file)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+
     # ========== 初始化扩展 ==========
 
     # SQLAlchemy ORM - 数据库操作
@@ -90,15 +106,31 @@ def create_app(config_class=Config):
     from app.utils.error_handlers import register_error_handlers
     register_error_handlers(app)
 
-    # ========== 确保会话目录存在 ==========
+    # ========== 自动创建数据库表 ==========
 
     # 技术要点：
-    # - Flask-Session 使用文件系统存储会话数据
-    # - 需要确保存储目录存在
-    import os
-    session_dir = app.config.get('SESSION_FILE_DIR')
-    if session_dir and not os.path.exists(session_dir):
-        os.makedirs(session_dir, exist_ok=True)
+    # - 检测数据库文件是否存在
+    # - 如果不存在，使用 db.create_all() 创建所有表
+    # - 适用于开发环境和小型部署
+    # - 生产环境应使用 Flask-Migrate 进行版本控制
+    with app.app_context():
+        try:
+            # 尝试连接数据库，如果失败则创建表
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+
+            if not existing_tables:
+                # 数据库为空，创建所有表
+                db.create_all()
+                app.logger.info('Database tables created successfully')
+        except Exception as e:
+            # 如果连接失败，尝试创建表（可能是新数据库）
+            try:
+                db.create_all()
+                app.logger.info('Database tables created successfully')
+            except Exception as create_error:
+                app.logger.error(f'Failed to create database tables: {create_error}')
 
     # ========== 健康检查端点 ==========
     # 用于 Docker 健康检查和负载均衡器探测

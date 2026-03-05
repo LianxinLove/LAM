@@ -15,7 +15,7 @@ services:
       - backend-data:/app/data
     environment:
       - FLASK_ENV=production
-      - DATABASE_URL=sqlite:///app/data/lab_asset_management.db
+      - DATABASE_URL=sqlite:////app/data/lab_asset_management.db?check_same_thread=False
     networks:
       - lab-network
     restart: unless-stopped

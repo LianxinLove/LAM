@@ -8,8 +8,8 @@ WORKDIR /app
 # 复制依赖文件
 COPY package.json package-lock.json* ./
 
-# 安装依赖
-RUN npm ci --only=production && \
+# 安装依赖（包括 devDependencies，构建需要）
+RUN npm ci && \
     npm cache clean --force
 
 # 复制源代码

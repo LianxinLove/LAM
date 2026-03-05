@@ -22,6 +22,12 @@
   background: #fff;
   border-radius: 8px;
   padding: 16px;
+  transition: background 0.3s ease;
+}
+
+// 暗色主题
+[data-theme='dark'] .table-container {
+  background: var(--background-color-light);
 }
 
 // 卡片样式
@@ -30,6 +36,12 @@
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 16px;
+  transition: background 0.3s ease;
+}
+
+// 暗色主题
+[data-theme='dark'] .card-container {
+  background: var(--background-color-light);
 }
 
 // 统计卡片样式
@@ -43,6 +55,15 @@
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
+  }
+}
+
+// 暗色主题
+[data-theme='dark'] .stat-card {
+  background: var(--background-color-light);
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -60,6 +81,12 @@
 .stat-label {
   color: #666;
   font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+// 暗色主题
+[data-theme='dark'] .stat-label {
+  color: var(--text-secondary);
 }
 
 // 警告样式
@@ -69,6 +96,13 @@
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+// 暗色主题
+[data-theme='dark'] .warning-card {
+  background: rgba(216, 150, 20, 0.15);
+  border-color: rgba(216, 150, 20, 0.4);
 }
 
 .warning-title {

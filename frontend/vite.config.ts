@@ -25,6 +25,11 @@ export default defineConfig(({ mode }) => {
         '@styles': path.resolve(__dirname, './src/styles'),
       }
     },
+    // 确保 React 被正确处理
+    esbuild: {
+      jsx: 'automatic',
+      jsxImportSource: 'react'
+    },
 
     // 开发服务器配置
     server: {
@@ -33,9 +38,29 @@ export default defineConfig(({ mode }) => {
       open: true,
       proxy: {
         '/api': {
-          target: env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+          target: 'http://localhost:5000',
           changeOrigin: true,
           secure: false,
+          configure: (proxy, _options) => {
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              // 确保请求头（包括 Cookie）被正确转发
+              if (req.headers.cookie) {
+                proxyReq.setHeader('Cookie', req.headers.cookie);
+              }
+            });
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              // 确保 Set-Cookie 头被正确转发
+              if (proxyRes.headers['set-cookie']) {
+                proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'].map((cookie: string) => {
+                  // 移除 Secure 和 SameSite 属性，以便在 http://localhost 开发环境下正常工作
+                  return cookie
+                    .replace(/; Secure/gi, '')
+                    .replace(/; SameSite=None/gi, '')
+                    .replace(/; SameSite=Lax/gi, '; SameSite=Lax');
+                });
+              }
+            });
+          },
           // 重写路径（如果后端不需要 /api 前缀）
           // rewrite: (path) => path.replace(/^\/api/, '')
         }
@@ -103,30 +128,6 @@ export default defineConfig(({ mode }) => {
             }
             // 默认放在 assets 目录
             return `assets/[name]-[hash][extname]`
-          },
-          // 手动代码拆分
-          manualChunks: (id) => {
-            // 将 node_modules 中的包拆分为单独的 chunk
-            if (id.includes('node_modules')) {
-              // React 核心库
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-                return 'vendor-react'
-              }
-              // Ant Design 组件库
-              if (id.includes('antd') || id.includes('@ant-design')) {
-                return 'vendor-antd'
-              }
-              // 图标库
-              if (id.includes('@ant-design/icons')) {
-                return 'vendor-icons'
-              }
-              // 工具库
-              if (id.includes('axios') || id.includes('dayjs') || id.includes('lodash')) {
-                return 'vendor-utils'
-              }
-              // 其他第三方库
-              return 'vendor'
-            }
           }
         }
       }
