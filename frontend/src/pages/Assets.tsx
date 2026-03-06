@@ -166,6 +166,7 @@ const Assets: React.FC = () => {
   const [users, setUsers] = useState<UserSimple[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [form] = Form.useForm<AssetFormValues>();
   const { isAdmin, user: currentUser } = useAuth();
 
@@ -375,12 +376,6 @@ const Assets: React.FC = () => {
 
   const columns: ColumnsType<AssetLite> = [
     {
-      title: '序号',
-      key: 'index',
-      width: 60,
-      render: (_: any, __: AssetLite, index: number) => index + 1,
-    },
-    {
       title: '编号',
       dataIndex: 'lab_asset_code',
       key: 'lab_asset_code',
@@ -546,6 +541,15 @@ ImageUploadFormItem.displayName = 'ImageUploadFormItem';
           rowKey="id"
           loading={loading}
           scroll={{ x: 1000 }}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (selectedKeys) => setSelectedRowKeys(selectedKeys),
+            selections: [
+              Table.SELECTION_ALL,
+              Table.SELECTION_INVERT,
+              Table.SELECTION_NONE,
+            ],
+          }}
           pagination={{
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
