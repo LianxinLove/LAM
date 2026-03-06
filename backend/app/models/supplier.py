@@ -16,9 +16,23 @@ class Supplier(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     # 关系定义
-    assets = db.relationship('Asset', backref='supplier', lazy='dynamic')
-    consumables = db.relationship('Consumable', backref='supplier', lazy='dynamic')
-    purchase_requests = db.relationship('PurchaseRequest', backref='supplier', lazy='dynamic')
+    # 注意：Asset模型已移除supplier_id字段，移除assets关系
+    # 注意：PurchaseRequest模型已移除supplier_id字段，移除purchase_requests关系
+    # 注意：consumables关系由Consumable模型通过backref定义，此处不重复定义
+    # 这样可以避免backref冲突
+
+    def get_consumables(self):
+        """获取该供应商提供的耗材"""
+        from app.models.consumable import Consumable
+        return Consumable.query.filter_by(supplier_id=self.id).all()
+
+    def get_assets(self):
+        """获取该供应商提供的资产（如有需要可通过其他方式关联）"""
+        return []  # 目前Asset模型无supplier关联
+
+    def get_purchase_requests(self):
+        """获取该供应商的采购申请（如有需要可通过其他方式关联）"""
+        return []  # 目前PurchaseRequest模型无supplier关联
 
     def to_dict(self):
         # 将供应商转换为字典

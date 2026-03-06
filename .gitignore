@@ -67,3 +67,6 @@ dist-ssr/
 
 # Docker
 *.tar
+
+# 上传文件（运行时生成）
+backend/uploads/

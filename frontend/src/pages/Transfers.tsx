@@ -25,7 +25,7 @@ import {
 import { getTransfers, createTransfer, approveTransfer, rejectTransfer } from '../api/transfers';
 import { getAssets } from '../api/assets';
 import { useAuth } from '../contexts/AuthContext';
-import type { TransferRequest, Asset, TransferFormData, QueryParams } from '../types';
+import type { TransferRequest, AssetLite, QueryParams } from '../types';
 import '../styles/common.scss';
 
 const { Option } = Select;
@@ -34,14 +34,14 @@ const { TextArea } = Input;
 // 资产转移页面组件
 const Transfers: React.FC = () => {
   const [requests, setRequests] = useState<TransferRequest[]>([]);
-  const [assets, setAssets] = useState<Asset[]>([]);
+  const [assets, setAssets] = useState<AssetLite[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewingRequest, setViewingRequest] = useState<TransferRequest | null>(null);
   const [activeTab, setActiveTab] = useState('my');
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-  const [form] = Form.useForm<TransferFormData>();
+  const [selectedAsset, setSelectedAsset] = useState<AssetLite | null>(null);
+  const [form] = Form.useForm<any>();
   const { isAdmin } = useAuth();
 
   // 初始化加载数据
@@ -96,14 +96,15 @@ const Transfers: React.FC = () => {
   };
 
   // 提交转移申请
-  const handleSubmit = async (values: TransferFormData) => {
+  const handleSubmit = async (values: any) => {
     try {
       await createTransfer(values);
       message.success('转移申请已提交');
       setModalVisible(false);
       fetchRequests();
-    } catch (error) {
-      message.error('提交失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '提交失败';
+      message.error(errorMsg);
     }
   };
 
@@ -117,8 +118,9 @@ const Transfers: React.FC = () => {
       }
       message.success(action === 'approve' ? '已批准' : '已拒绝');
       fetchRequests();
-    } catch (error) {
-      message.error('操作失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '操作失败';
+      message.error(errorMsg);
     }
   };
 
@@ -151,7 +153,7 @@ const Transfers: React.FC = () => {
     },
     {
       title: '资产编号',
-      dataIndex: ['asset', 'code'],
+      dataIndex: ['asset', 'lab_asset_code'],
       key: 'asset_code',
     },
     {
@@ -281,26 +283,49 @@ const Transfers: React.FC = () => {
             <Select
               placeholder="请选择资产"
               onChange={handleAssetChange}
+              showSearch
+              optionFilterProp="children"
             >
               {assets.map(asset => (
                 <Option key={asset.id} value={asset.id}>
-                  {asset.code} - {asset.name} (当前位置: {asset.location || '未设置'})
+                  {asset.lab_asset_code} - {asset.name} (当前位置: {asset.location || '未设置'})
                 </Option>
               ))}
             </Select>
           </Form.Item>
           {selectedAsset && (
-            <div style={{ marginBottom: 16, padding: 12, background: '#f5f5f5', borderRadius: 4 }}>
+            <Card size="small" style={{ marginBottom: 16 }}>
               <p><strong>当前位置：</strong>{selectedAsset.location || '未设置'}</p>
-            </div>
+            </Card>
           )}
-          <Form.Item
-            name="to_location"
-            label="新位置"
-            rules={[{ required: true, message: '请输入新位置' }]}
-          >
-            <Input placeholder="请输入新位置" />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item
+                name="to_campus"
+                label="目标校区"
+                rules={[{ required: true, message: '请输入校区' }]}
+              >
+                <Input placeholder="如：本部" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="to_building"
+                label="目标楼宇"
+                rules={[{ required: true, message: '请输入楼宇' }]}
+              >
+                <Input placeholder="如：实验楼A" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item
+                name="to_room"
+                label="目标房间"
+              >
+                <Input placeholder="如：301" />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item
             name="reason"
             label="转移原因"
@@ -339,7 +364,7 @@ const Transfers: React.FC = () => {
                 <strong>资产名称：</strong>{viewingRequest.asset?.name}
               </Col>
               <Col span={12}>
-                <strong>资产编号：</strong>{viewingRequest.asset?.code}
+                <strong>资产编号：</strong>{viewingRequest.asset?.lab_asset_code}
               </Col>
               <Col span={12}>
                 <strong>原位置：</strong>{viewingRequest.from_location}
@@ -356,6 +381,11 @@ const Transfers: React.FC = () => {
               <Col span={12}>
                 <strong>申请人：</strong>{viewingRequest.applicant?.username}
               </Col>
+              {viewingRequest.receiver && (
+                <Col span={12}>
+                  <strong>接收确认人：</strong>{viewingRequest.receiver.username}
+                </Col>
+              )}
               <Col span={12}>
                 <strong>申请时间：</strong>{new Date(viewingRequest.created_at).toLocaleString('zh-CN')}
               </Col>

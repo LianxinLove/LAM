@@ -1,68 +1,81 @@
 # 数据库初始化脚本
-# 创建数据库表和初始数据
+#
+# 用途：
+# 1. 重新创建所有表
+# 2. 创建默认管理员账户
+#
+# 使用方法：
+#   python init_db.py
+
+import os
+import sys
+
+# 添加项目根目录到路径
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import create_app
-from app.config import config
-from app.models import User, Category, Supplier
 from app.extensions import db
+from app.models import User
+
 
 def init_database():
-    # 使用表和初始数据初始化数据库
-    app = create_app(config['default'])
+    """初始化数据库"""
+    app = create_app()
 
     with app.app_context():
-        # 创建所有表
-        print("Creating database tables...")
-        db.create_all()
-        print("Database tables created successfully!")
+        # 检查并创建所有表
+        from sqlalchemy import inspect
+        inspector = inspect(db.engine)
+        existing_tables = inspector.get_table_names()
 
-        # 检查管理员用户是否存在
+        if existing_tables:
+            print(f"! 数据库已存在 {len(existing_tables)} 个表: {existing_tables}")
+            print("! 如需重建数据库，请先停止后端服务并删除 lab_asset_management.db 文件")
+        else:
+            db.create_all()
+            print("✓ 数据库表创建成功")
+
+        # 创建默认管理员账户
         admin = User.query.filter_by(username='admin').first()
         if not admin:
-            print("Creating admin user...")
             admin = User(
                 username='admin',
-                email='admin@example.com',
-                is_superuser=True,
-                is_active=True
+                email='admin@lam.local',
+                is_superuser=True
             )
             admin.set_password('admin123')
             db.session.add(admin)
             db.session.commit()
-            print("Admin user created successfully!")
-            print("Username: admin")
-            print("Password: admin123")
+            print("✓ 默认管理员账户创建成功")
+            print("  用户名: admin")
+            print("  密码: admin123")
+            print("  请在登录后立即修改密码！")
         else:
-            print("Admin user already exists.")
+            print("! 管理员账户已存在")
 
-        # 创建默认类别
-        default_categories = ['试剂', '耗材', '仪器', '其他']
-        for cat_name in default_categories:
-            category = Category.query.filter_by(name=cat_name).first()
-            if not category:
-                print(f"Creating category: {cat_name}")
-                category = Category(name=cat_name)
-                db.session.add(category)
-
-        db.session.commit()
-        print("Default categories created successfully!")
-
-        # 创建示例供应商
-        supplier = Supplier.query.filter_by(name='示例供应商').first()
-        if not supplier:
-            print("Creating sample supplier...")
-            supplier = Supplier(
-                name='示例供应商',
-                contact='张三',
-                phone='13800138000',
-                email='supplier@example.com',
-                address='北京市朝阳区'
+        # 创建测试普通用户
+        test_user = User.query.filter_by(username='test').first()
+        if not test_user:
+            test_user = User(
+                username='test',
+                email='test@lam.local',
+                is_superuser=False
             )
-            db.session.add(supplier)
+            test_user.set_password('test123')
+            db.session.add(test_user)
             db.session.commit()
-            print("Sample supplier created successfully!")
+            print("✓ 测试用户账户创建成功")
+            print("  用户名: test")
+            print("  密码: test123")
 
-        print("\nDatabase initialization completed!")
-        print("\nYou can now start the application with: python run.py")
+        print("\n" + "=" * 50)
+        print("初始化完成！")
+        print("=" * 50)
+        print("管理员登录信息：")
+        print("  用户名: admin")
+        print("  密码: admin123")
+        print("=" * 50)
+
 
 if __name__ == '__main__':
     init_database()

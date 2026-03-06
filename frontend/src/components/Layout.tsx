@@ -18,6 +18,7 @@ import {
   HistoryOutlined,
   SunOutlined,
   MoonOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -70,12 +71,17 @@ const MainLayout: React.FC = () => {
       icon: <FileTextOutlined />,
       label: '耗材领用',
     },
+    {
+      key: '/transfers',
+      icon: <SwapOutlined />,
+      label: '资产转移',
+    },
+    {
+      key: '/applications',
+      icon: <ToolOutlined />,
+      label: '资产业务',
+    },
     ...(isAdmin ? [
-      {
-        key: '/transfers',
-        icon: <SwapOutlined />,
-        label: '资产调拨',
-      },
       {
         key: '/logs',
         icon: <HistoryOutlined />,
