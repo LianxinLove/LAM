@@ -6,7 +6,6 @@
  * - 获取采购申请详情
  * - 创建采购申请
  * - 更新采购申请
- * - 删除采购申请
  * - 审批采购申请（批准/拒绝）
  *
  * 筛选参数（QueryParams）：
@@ -58,8 +57,7 @@ export const getPurchase = (id: number): Promise<ApiResponse<PurchaseRequest>> =
  * @param data - 采购申请信息
  * @returns 创建的采购申请信息
  *
- * 必填字段：title, item_name, quantity, estimated_price, reason
- * 可选字段：supplier_id
+ * 必填字段：product_name, product_code, quantity, purpose, project_name, delivery_info
  */
 export const createPurchase = (data: PurchaseFormData): Promise<ApiResponse<PurchaseRequest>> => {
   return api.post('/purchases', data);
@@ -74,45 +72,82 @@ export const createPurchase = (data: PurchaseFormData): Promise<ApiResponse<Purc
  *
  * 注意：通常只能更新待审批状态的申请
  */
-export const updatePurchase = (id: number, data: PurchaseFormData): Promise<ApiResponse<PurchaseRequest>> => {
+export const updatePurchase = (id: number, data: Partial<PurchaseFormData>): Promise<ApiResponse<PurchaseRequest>> => {
   return api.put(`/purchases/${id}`, data);
 };
 
 /**
- * 删除采购申请
+ * 审批采购申请
  *
  * @param id - 采购申请 ID
- * @returns 空
+ * @param action - 审批操作（approve/reject）
+ * @param approval_comment - 审批意见
+ * @returns 更新后的采购申请信息
  *
- * 注意：通常只能删除待审批状态的申请
+ * 权限：仅管理员可操作
  */
-export const deletePurchase = (id: number): Promise<ApiResponse<void>> => {
-  return api.delete(`/purchases/${id}`);
+export const approvePurchase = (
+  id: number,
+  action: 'approve' | 'reject',
+  approval_comment?: string
+): Promise<ApiResponse<PurchaseRequest>> => {
+  return api.post(`/purchases/${id}/approve`, { action, approval_comment });
 };
 
 /**
  * 批准采购申请
  *
  * @param id - 采购申请 ID
+ * @param approval_comment - 审批意见（可选）
  * @returns 更新后的采购申请信息
  *
  * 权限：仅管理员可操作
  * 效果：状态变更为 approved，记录审批人和审批时间
  */
-export const approvePurchase = (id: number): Promise<ApiResponse<PurchaseRequest>> => {
-  return api.post(`/purchases/${id}/approve`, { action: 'approve' });
+export const approvePurchaseRequest = (id: number, approval_comment?: string): Promise<ApiResponse<PurchaseRequest>> => {
+  return api.post(`/purchases/${id}/approve`, { action: 'approve', approval_comment });
 };
 
 /**
  * 拒绝采购申请
  *
  * @param id - 采购申请 ID
- * @param reason - 拒绝原因（可选）
+ * @param approval_comment - 拒绝原因（可选）
  * @returns 更新后的采购申请信息
  *
  * 权限：仅管理员可操作
  * 效果：状态变更为 rejected，记录审批人、审批时间和拒绝原因
  */
-export const rejectPurchase = (id: number, reason?: string): Promise<ApiResponse<PurchaseRequest>> => {
-  return api.post(`/purchases/${id}/approve`, { action: 'reject', reason });
+export const rejectPurchaseRequest = (id: number, approval_comment?: string): Promise<ApiResponse<PurchaseRequest>> => {
+  return api.post(`/purchases/${id}/approve`, { action: 'reject', approval_comment });
+};
+
+/**
+ * 采购状态枚举值
+ */
+export const PurchaseStatuses = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  PURCHASED: 'purchased',
+  REJECTED: 'rejected'
+} as const;
+
+/**
+ * 采购状态标签映射
+ */
+export const PurchaseStatusLabel: Record<string, string> = {
+  pending: '待审批',
+  approved: '已审批',
+  purchased: '已采购',
+  rejected: '已拒绝'
+};
+
+/**
+ * 采购状态颜色映射（用于Tag显示）
+ */
+export const PurchaseStatusColor: Record<string, string> = {
+  pending: 'orange',
+  approved: 'green',
+  purchased: 'blue',
+  rejected: 'red'
 };

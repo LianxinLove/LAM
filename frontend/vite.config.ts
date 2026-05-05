@@ -63,6 +63,11 @@ export default defineConfig(({ mode }) => {
           },
           // 重写路径（如果后端不需要 /api 前缀）
           // rewrite: (path) => path.replace(/^\/api/, '')
+        },
+        '/uploads': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
         }
       }
     },

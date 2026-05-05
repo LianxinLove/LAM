@@ -14,20 +14,21 @@
  * - 使用 Context API 实现全局状态管理
  *
  * 路由结构：
- * /login          - 登录页（公开访问）
- * /*              - 受保护的路由（需要登录）
- *   /dashboard    - 仪表盘
- *   /assets       - 资产管理
- *   /consumables  - 耗材管理
- *   /purchases    - 采购管理
- *   /borrows      - 资产借用
- *   /picks        - 耗材领用
- *   /transfers    - 资产调拨（仅管理员）
- *   /logs         - 操作日志（仅管理员）
- *   /statistics   - 统计分析
- *   /categories   - 资产类别（仅管理员）
- *   /suppliers    - 供应商管理（仅管理员）
- *   /help         - 帮助文档
+ * /login              - 登录页（公开访问）
+ * /*                 - 受保护的路由（需要登录）
+ *   /dashboard       - 仪表盘
+ *   /assets          - 资产管理
+ *   /consumables     - 耗材管理
+ *   /purchases       - 采购管理
+ *   /borrows         - 资产借用
+ *   /picks           - 耗材领用
+ *   /transfers       - 资产调拨
+ *   /applications    - 资产业务申请
+ *   /logs            - 操作日志（仅管理员）
+ *   /statistics      - 统计分析
+ *   /categories      - 资产类别（仅管理员）
+ *   /suppliers       - 供应商管理（仅管理员）
+ *   /help            - 帮助文档
  */
 
 import React from "react";
@@ -46,6 +47,7 @@ import Purchases from "./pages/Purchases";
 import Borrows from "./pages/Borrows";
 import Picks from "./pages/Picks";
 import Transfers from "./pages/Transfers";
+import AssetApplications from "./pages/AssetApplications";
 import Statistics from "./pages/Statistics";
 import Logs from "./pages/Logs";
 import Categories from "./pages/Categories";
@@ -105,18 +107,12 @@ const AppContent: React.FC = () => {
               <Route path="purchases" element={<Purchases />} />
               <Route path="borrows" element={<Borrows />} />
               <Route path="picks" element={<Picks />} />
+              <Route path="transfers" element={<Transfers />} />
+              <Route path="applications" element={<AssetApplications />} />
               <Route path="statistics" element={<Statistics />} />
               <Route path="help" element={<Help />} />
 
               {/* 管理员功能路由 - 仅管理员可访问 */}
-              <Route
-                path="transfers"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <Transfers />
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="logs"
                 element={

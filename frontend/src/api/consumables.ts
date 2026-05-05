@@ -10,7 +10,9 @@
  *
  * 筛选参数（QueryParams）：
  * - category_id: 按类别筛选
+ * - consumable_type: 按分类筛选（consumable/reagent）
  * - low_stock: 是否仅显示低库存项目（布尔值）
+ * - is_expired: 是否仅显示过期项目（布尔值）
  * - page: 页码
  * - page_size: 每页数量
  */
@@ -31,6 +33,9 @@ import type { Consumable, ConsumableFormData, ApiResponse, PaginatedResponse, Qu
  *
  * // 仅获取低库存耗材
  * const lowStock = await getConsumables({ low_stock: true });
+ *
+ * // 按分类筛选
+ * const reagents = await getConsumables({ consumable_type: 'reagent' });
  * ```
  */
 export const getConsumables = (params?: QueryParams): Promise<ApiResponse<PaginatedResponse<Consumable>>> => {
@@ -53,8 +58,7 @@ export const getConsumable = (id: number): Promise<ApiResponse<Consumable>> => {
  * @param data - 耗材信息
  * @returns 创建的耗材信息
  *
- * 必填字段：name, category_id, unit, stock, min_stock
- * 可选字段：supplier_id, price, location
+ * 必填字段：name, category_id, product_code, custodian_name, custodian_phone
  */
 export const createConsumable = (data: ConsumableFormData): Promise<ApiResponse<Consumable>> => {
   return api.post('/consumables', data);
@@ -67,7 +71,7 @@ export const createConsumable = (data: ConsumableFormData): Promise<ApiResponse<
  * @param data - 更新的耗材信息
  * @returns 更新后的耗材信息
  */
-export const updateConsumable = (id: number, data: ConsumableFormData): Promise<ApiResponse<Consumable>> => {
+export const updateConsumable = (id: number, data: Partial<ConsumableFormData>): Promise<ApiResponse<Consumable>> => {
   return api.put(`/consumables/${id}`, data);
 };
 
@@ -79,4 +83,38 @@ export const updateConsumable = (id: number, data: ConsumableFormData): Promise<
  */
 export const deleteConsumable = (id: number): Promise<ApiResponse<void>> => {
   return api.delete(`/consumables/${id}`);
+};
+
+/**
+ * 耗材形态枚举值
+ */
+export const ConsumableForms = {
+  SOLID: 'solid',
+  LIQUID: 'liquid',
+  GAS: 'gas'
+} as const;
+
+/**
+ * 耗材分类枚举值
+ */
+export const ConsumableTypes = {
+  CONSUMABLE: 'consumable',
+  REAGENT: 'reagent'
+} as const;
+
+/**
+ * 耗材形态标签映射
+ */
+export const ConsumableFormLabels: Record<string, string> = {
+  solid: '固体',
+  liquid: '液体',
+  gas: '气体'
+};
+
+/**
+ * 耗材分类标签映射
+ */
+export const ConsumableTypeLabels: Record<string, string> = {
+  consumable: '耗材',
+  reagent: '试剂'
 };

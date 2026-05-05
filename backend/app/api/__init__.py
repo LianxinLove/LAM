@@ -12,45 +12,46 @@
 #
 # API 路由结构：
 # /api/auth        - 认证相关（登录、注册、登出）
+# /api/users       - 用户管理
 # /api/assets      - 资产管理
 # /api/consumables - 耗材管理
 # /api/purchases   - 采购管理
 # /api/borrows     - 资产借用
 # /api/picks       - 耗材领用
 # /api/transfers   - 资产调拨
+# /api/asset-applications - 资产业务申请
 # /api/dashboard   - 仪表盘统计
 # /api/categories   - 资产类别
 # /api/suppliers   - 供应商管理
 # /api/logs        - 操作日志
+# /api/upload      - 文件上传
 
 # 导入各模块蓝图
 from app.api.auth import auth_bp
+from app.api.users import users_bp
 from app.api.assets import assets_bp
 from app.api.consumables import consumables_bp
 from app.api.purchases import purchases_bp
 from app.api.borrows import borrows_bp
 from app.api.picks import picks_bp
 from app.api.transfers import transfers_bp
+from app.api.asset_applications import asset_applications_bp
 from app.api.dashboard import dashboard_bp
 from app.api.categories import categories_bp
 from app.api.suppliers import suppliers_bp
 from app.api.logs import logs_bp
+from app.api.upload import upload_bp
 
 
 def register_blueprints(app):
-    # """
-    # 注册所有 API 蓝图到 Flask 应用
-    #
-    # 技术要点：
-    # - url_prefix：为整个蓝图添加 URL 前缀
-    # - 统一前缀：/api/xxx，便于识别和代理配置
-    # - 便于版本控制：可以添加 /api/v1/xxx
-    #
-    # Args:
-    #     app (Flask): Flask 应用实例
-    # """
+    """
+    注册所有 API 蓝图到 Flask 应用
+    """
     # 认证模块
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+
+    # 用户管理模块
+    app.register_blueprint(users_bp, url_prefix='/api/users')
 
     # 核心业务模块
     app.register_blueprint(assets_bp, url_prefix='/api/assets')
@@ -64,6 +65,12 @@ def register_blueprints(app):
     app.register_blueprint(picks_bp, url_prefix='/api/picks')
     app.register_blueprint(transfers_bp, url_prefix='/api/transfers')
 
+    # 资产业务申请模块
+    app.register_blueprint(asset_applications_bp, url_prefix='/api/asset-applications')
+
     # 统计和日志模块
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(logs_bp, url_prefix='/api/logs')
+
+    # 文件上传模块
+    app.register_blueprint(upload_bp, url_prefix='/api/upload')

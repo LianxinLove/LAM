@@ -96,10 +96,13 @@ class Config:
     # 允许的跨域源
     # 技术要点：
     # - 生产环境应指定具体域名
-    # - 开发环境可使用 localhost
-    # - 支持 credentials 时不能使用 '*'
-    CORS_ORIGINS = os.environ.get('CORS_ORIGINS',
-                                  'http://localhost,http://localhost:5173,http://localhost:5174,http://localhost:3000').split(',')
+    # - 开发环境使用 '*' 允许所有源（方便局域网访问）
+    # - 支持 credentials 时不能使用 '*'，但开发环境通过前端直接请求后端 IP 可解决
+    # - 可通过环境变量 CORS_ORIGINS 自定义
+    default_origins = '*'
+    if os.environ.get('CORS_ORIGINS'):
+        default_origins = os.environ.get('CORS_ORIGINS')
+    CORS_ORIGINS = default_origins
 
     # 是否支持跨域携带凭证（Cookie）
     # 技术要点：

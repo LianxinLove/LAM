@@ -28,8 +28,14 @@
       "Bash(docker exec lab-frontend sh -c \"ls -la /usr/share/nginx/html/js/\")",
       "Bash(docker exec lab-backend sh -c \"ls -la /app/data/ 2>&1; whoami; id\")",
       "Bash(docker exec lab-backend sh -c \"flask db upgrade 2>&1\")",
+<<<<<<< HEAD
       "Bash(git diff *)",
       "Bash(git config *)"
+=======
+      "Bash(sed:*)",
+      "Bash(handle backendlab_asset_management.db)",
+      "Bash(powershell -Command \"Get-Process | Where-Object {$_MainWindowTitle -like ''*flask*'' -or $_ProcessName -like ''*python*''} | Select-Object Id,ProcessName,MainWindowTitle\")"
+>>>>>>> 2a53791a2d81b98ebc7fa65a4537c0f79f920c25
     ]
   }
 }

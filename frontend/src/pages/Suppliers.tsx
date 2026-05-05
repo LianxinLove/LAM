@@ -73,8 +73,9 @@ const Suppliers: React.FC = () => {
       await deleteSupplier(id);
       message.success('删除成功');
       fetchSuppliers();
-    } catch (error) {
-      message.error('删除失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '删除失败';
+      message.error(errorMsg);
     }
   };
 
@@ -96,8 +97,9 @@ const Suppliers: React.FC = () => {
       }
       setModalVisible(false);
       fetchSuppliers();
-    } catch (error) {
-      message.error(editingSupplier ? '更新失败' : '创建失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || (editingSupplier ? '更新失败' : '创建失败');
+      message.error(errorMsg);
     }
   };
 

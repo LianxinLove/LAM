@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
 import {
   Table,
   Button,
@@ -7,6 +8,7 @@ import {
   Form,
   Input,
   Select,
+  DatePicker,
   InputNumber,
   message,
   Popconfirm,
@@ -24,7 +26,7 @@ import {
   EyeOutlined,
   WarningOutlined
 } from '@ant-design/icons';
-import { getConsumables, createConsumable, updateConsumable, deleteConsumable } from '../api/consumables';
+import { getConsumables, createConsumable, updateConsumable, deleteConsumable, ConsumableTypeLabels, ConsumableFormLabels } from '../api/consumables';
 import { getCategories } from '../api/categories';
 import { getSuppliers } from '../api/suppliers';
 import { useAuth } from '../contexts/AuthContext';
@@ -56,7 +58,6 @@ const Consumables: React.FC = () => {
   const fetchConsumables = async (params?: QueryParams) => {
     setLoading(true);
     try {
-      // Remove undefined, empty string, and false values from params
       const cleanParams: QueryParams = { ...(params || filters) };
       (Object.keys(cleanParams) as Array<keyof QueryParams>).forEach(key => {
         if (cleanParams[key] === undefined || cleanParams[key] === '' || cleanParams[key] === false) {
@@ -102,6 +103,8 @@ const Consumables: React.FC = () => {
       ...record,
       category_id: record.category?.id,
       supplier_id: record.supplier?.id,
+      production_date: record.production_date ? dayjs(record.production_date) : null,
+      expiration_date: record.expiration_date ? dayjs(record.expiration_date) : null,
     });
     setModalVisible(true);
   };
@@ -116,90 +119,156 @@ const Consumables: React.FC = () => {
       await deleteConsumable(id);
       message.success('删除成功');
       fetchConsumables();
-    } catch (error) {
-      message.error('删除失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '删除失败';
+      message.error(errorMsg);
     }
   };
 
   const handleSubmit = async (values: ConsumableFormData) => {
     try {
+      const data = {
+        ...values,
+        production_date: values.production_date ? dayjs(values.production_date).format('YYYY-MM-DD') : undefined,
+        expiration_date: values.expiration_date ? dayjs(values.expiration_date).format('YYYY-MM-DD') : undefined,
+      };
       if (editingConsumable) {
-        await updateConsumable(editingConsumable.id, values);
+        await updateConsumable(editingConsumable.id, data);
         message.success('更新成功');
       } else {
-        await createConsumable(values);
+        await createConsumable(data);
         message.success('创建成功');
       }
       setModalVisible(false);
       fetchConsumables();
-    } catch (error) {
-      message.error(editingConsumable ? '更新失败' : '创建失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || (editingConsumable ? '更新失败' : '创建失败');
+      message.error(errorMsg);
     }
   };
 
   const columns: ColumnsType<Consumable> = [
     {
+      title: '序号',
+      key: 'index',
+      width: 60,
+      render: (_: any, __: Consumable, index: number) => index + 1,
+    },
+    {
       title: '耗材编号',
       dataIndex: 'code',
       key: 'code',
+      width: 100,
+    },
+    {
+      title: '产品名称',
+      dataIndex: 'name',
+      key: 'name',
+      width: 150,
+    },
+    {
+      title: '品牌',
+      dataIndex: 'brand',
+      key: 'brand',
+      width: 100,
+      render: (brand?: string) => brand || '-',
+    },
+    {
+      title: '货号',
+      dataIndex: 'product_code',
+      key: 'product_code',
       width: 120,
     },
     {
-      title: '耗材名称',
-      dataIndex: 'name',
-      key: 'name',
+      title: 'CAS号',
+      dataIndex: 'cas_number',
+      key: 'cas_number',
+      width: 100,
+      render: (cas?: string) => cas || '-',
     },
     {
-      title: '类别',
-      dataIndex: ['category', 'name'],
-      key: 'category',
-    },
-    {
-      title: '供应商',
-      dataIndex: ['supplier', 'name'],
-      key: 'supplier',
-      render: (supplier?: string) => supplier || '-',
-    },
-    {
-      title: '单位',
-      dataIndex: 'unit',
-      key: 'unit',
+      title: '形态',
+      dataIndex: 'form',
+      key: 'form',
       width: 80,
+      render: (form?: string) => form ? ConsumableFormLabels[form] : '-',
     },
     {
-      title: '当前库存',
-      dataIndex: 'stock',
-      key: 'stock',
-      render: (stock: number, record: Consumable) => (
-        <Tag color={stock < record.min_stock ? 'red' : 'green'}>
-          {stock} {record.unit}
+      title: '分类',
+      dataIndex: 'consumable_type',
+      key: 'consumable_type',
+      width: 80,
+      render: (type: string) => (
+        <Tag color={type === 'reagent' ? 'blue' : 'green'}>
+          {ConsumableTypeLabels[type]}
         </Tag>
       ),
     },
     {
-      title: '最低库存',
-      dataIndex: 'min_stock',
-      key: 'min_stock',
-      render: (min_stock: number) => `${min_stock}`,
+      title: '是否危化品',
+      dataIndex: 'is_hazardous',
+      key: 'is_hazardous',
+      width: 100,
+      render: (isHazardous: boolean) => (
+        <Tag color={isHazardous ? 'red' : 'default'}>
+          {isHazardous ? '是' : '否'}
+        </Tag>
+      ),
     },
     {
-      title: '单价',
-      dataIndex: 'price',
-      key: 'price',
-      render: (price?: number) => price ? `¥${price.toFixed(2)}` : '-',
+      title: '规格',
+      dataIndex: 'specifications',
+      key: 'specifications',
+      width: 100,
+      render: (spec?: string) => spec || '-',
+    },
+    {
+      title: '现存数量',
+      dataIndex: 'stock',
+      key: 'stock',
+      width: 100,
+      render: (stock: number, record: Consumable) => (
+        <Tag color={stock < record.min_stock ? 'red' : 'green'}>
+          {stock}
+        </Tag>
+      ),
+    },
+    {
+      title: '课题组保管人',
+      dataIndex: 'custodian_name',
+      key: 'custodian_name',
+      width: 120,
+    },
+    {
+      title: '是否过期',
+      dataIndex: 'is_expired',
+      key: 'is_expired',
+      width: 100,
+      render: (isExpired?: boolean) => (
+        <Tag color={isExpired ? 'red' : 'green'}>
+          {isExpired ? '已过期' : '未过期'}
+        </Tag>
+      ),
     },
     {
       title: '存放位置',
-      dataIndex: 'location',
       key: 'location',
+      width: 150,
+      render: (_: any, record: Consumable) => {
+        const parts = [record.campus, record.building, record.room, record.storage_area].filter(Boolean);
+        return parts.join('/') || '-';
+      },
     },
     {
       title: '操作',
       key: 'action',
+      width: 180,
+      fixed: 'right' as const,
       render: (_: any, record: Consumable) => (
         <Space size="small">
           <Button
             type="link"
+            size="small"
             icon={<EyeOutlined />}
             onClick={() => handleView(record)}
           >
@@ -209,6 +278,7 @@ const Consumables: React.FC = () => {
             <>
               <Button
                 type="link"
+                size="small"
                 icon={<EditOutlined />}
                 onClick={() => handleEdit(record)}
               >
@@ -220,7 +290,7 @@ const Consumables: React.FC = () => {
                 okText="确定"
                 cancelText="取消"
               >
-                <Button type="link" danger icon={<DeleteOutlined />}>
+                <Button type="link" size="small" danger icon={<DeleteOutlined />}>
                   删除
                 </Button>
               </Popconfirm>
@@ -238,17 +308,16 @@ const Consumables: React.FC = () => {
         <Space className="page-actions">
           <Select
             placeholder="按类别筛选"
-            style={{ width: 150 }}
+            style={{ width: 120 }}
             allowClear
             onChange={(value) => {
-              const newFilters = { ...filters, category_id: value };
+              const newFilters = { ...filters, consumable_type: value };
               setFilters(newFilters);
               fetchConsumables(newFilters);
             }}
           >
-            {categories.map(cat => (
-              <Option key={cat.id} value={cat.id}>{cat.name}</Option>
-            ))}
+            <Option value="consumable">耗材</Option>
+            <Option value="reagent">试剂</Option>
           </Select>
           <Button
             type={filters.low_stock ? 'primary' : 'default'}
@@ -261,6 +330,16 @@ const Consumables: React.FC = () => {
           >
             {filters.low_stock ? '显示全部' : '仅显示低库存'}
           </Button>
+          <Button
+            type={filters.is_expired ? 'primary' : 'default'}
+            onClick={() => {
+              const newFilters = { ...filters, is_expired: !filters.is_expired };
+              setFilters(newFilters);
+              fetchConsumables(newFilters);
+            }}
+          >
+            {filters.is_expired ? '显示全部' : '仅显示过期'}
+          </Button>
           {isAdmin && (
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
               添加耗材
@@ -269,9 +348,9 @@ const Consumables: React.FC = () => {
         </Space>
       </div>
 
-      {filters.low_stock && (
+      {(filters.low_stock || filters.is_expired) && (
         <Alert
-          message="仅显示库存低于最低库存的耗材"
+          message={filters.low_stock ? '仅显示库存低于最低库存的耗材' : '仅显示已过期的耗材'}
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
@@ -284,6 +363,7 @@ const Consumables: React.FC = () => {
           dataSource={consumables}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 2000 }}
           pagination={{
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
@@ -291,104 +371,228 @@ const Consumables: React.FC = () => {
         />
       </div>
 
+      {/* 添加/编辑耗材模态框 */}
       <Modal
         title={editingConsumable ? '编辑耗材' : '添加耗材'}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
-        width={800}
+        width={900}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="name"
-                label="耗材名称"
-                rules={[{ required: true, message: '请输入耗材名称' }]}
-              >
-                <Input placeholder="请输入耗材名称" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="category_id"
-                label="耗材类别"
-                rules={[{ required: true, message: '请选择耗材类别' }]}
-              >
-                <Select placeholder="请选择耗材类别">
-                  {categories.map(cat => (
-                    <Option key={cat.id} value={cat.id}>{cat.name}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="supplier_id" label="供应商">
-                <Select placeholder="请选择供应商" allowClear>
-                  {suppliers.map(sup => (
-                    <Option key={sup.id} value={sup.id}>{sup.name}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="unit"
-                label="单位"
-                rules={[{ required: true, message: '请输入单位' }]}
-                initialValue="个"
-              >
-                <Input placeholder="请输入单位" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item
-                name="stock"
-                label="初始库存"
-                rules={[{ required: true, message: '请输入初始库存' }]}
-                initialValue={0}
-              >
-                <InputNumber
-                  style={{ width: '100%' }}
-                  placeholder="请输入初始库存"
-                  min={0}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name="min_stock"
-                label="最低库存"
-                rules={[{ required: true, message: '请输入最低库存' }]}
-                initialValue={10}
-              >
-                <InputNumber
-                  style={{ width: '100%' }}
-                  placeholder="请输入最低库存"
-                  min={0}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item name="price" label="单价">
-                <InputNumber
-                  style={{ width: '100%' }}
-                  placeholder="请输入单价"
-                  min={0}
-                  precision={2}
-                  prefix="¥"
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Form.Item name="location" label="存放位置">
-            <Input placeholder="请输入存放位置" />
-          </Form.Item>
-          <Form.Item>
+          <Card title="基本信息" size="small" style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="name"
+                  label="产品名称"
+                  rules={[{ required: true, message: '请输入产品名称' }]}
+                >
+                  <Input placeholder="请输入产品名称" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="category_id"
+                  label="类别"
+                  rules={[{ required: true, message: '请选择类别' }]}
+                >
+                  <Select placeholder="请选择类别">
+                    {categories.map(cat => (
+                      <Option key={cat.id} value={cat.id}>{cat.name}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item name="brand" label="品牌">
+                  <Input placeholder="请输入品牌" />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name="product_code"
+                  label="货号"
+                  rules={[{ required: true, message: '请输入货号' }]}
+                >
+                  <Input placeholder="请输入货号" />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item name="cas_number" label="CAS号">
+                  <Input placeholder="请输入CAS号" />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item name="form" label="形态">
+                  <Select placeholder="请选择形态">
+                    <Option value="solid">固体</Option>
+                    <Option value="liquid">液体</Option>
+                    <Option value="gas">气体</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name="consumable_type"
+                  label="分类"
+                  initialValue="consumable"
+                >
+                  <Select>
+                    <Option value="consumable">耗材</Option>
+                    <Option value="reagent">试剂</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name="is_hazardous"
+                  label="是否危化品"
+                  valuePropName="checked"
+                >
+                  <Select>
+                    <Option value={false}>否</Option>
+                    <Option value={true}>是</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item name="specifications" label="规格">
+                  <Input placeholder="请输入规格" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="supplier_id" label="供应商">
+                  <Select placeholder="请选择供应商" allowClear>
+                    {suppliers.map(sup => (
+                      <Option key={sup.id} value={sup.id}>{sup.name}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Card>
+
+          <Card title="库存信息" size="small" style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item
+                  name="stock"
+                  label="现存数量"
+                  rules={[{ required: true, message: '请输入现存数量' }]}
+                  initialValue={0}
+                >
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    placeholder="请输入现存数量"
+                    min={0}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item
+                  name="min_stock"
+                  label="最低库存"
+                  rules={[{ required: true, message: '请输入最低库存' }]}
+                  initialValue={10}
+                >
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    placeholder="请输入最低库存"
+                    min={0}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item name="price" label="单价">
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    placeholder="请输入单价"
+                    min={0}
+                    precision={2}
+                    prefix="¥"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Card>
+
+          <Card title="保管人信息" size="small" style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="custodian_name"
+                  label="课题组保管人"
+                  rules={[{ required: true, message: '请输入保管人' }]}
+                >
+                  <Input placeholder="请输入保管人" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="custodian_phone"
+                  label="保管人联系方式"
+                  rules={[{ required: true, message: '请输入联系方式' }]}
+                >
+                  <Input placeholder="请输入联系方式" />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Card>
+
+          <Card title="日期信息" size="small" style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item name="production_date" label="产品最早生产日期">
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="expiration_date" label="产品保质期">
+                  <DatePicker style={{ width: '100%' }} />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Card>
+
+          <Card title="存放信息" size="small" style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col span={6}>
+                <Form.Item name="campus" label="存放校区">
+                  <Input placeholder="请输入校区" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item name="building" label="存放楼宇">
+                  <Input placeholder="请输入楼宇" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item name="room" label="存放房间">
+                  <Input placeholder="请输入房间" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item name="storage_area" label="存放区域">
+                  <Input placeholder="请输入区域" />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Card>
+
+          <Card title="其他" size="small">
+            <Form.Item name="remarks" label="备注">
+              <TextArea rows={2} placeholder="请输入备注" />
+            </Form.Item>
+          </Card>
+
+          <Form.Item style={{ marginTop: 16 }}>
             <Space>
               <Button type="primary" htmlType="submit">
                 {editingConsumable ? '更新' : '创建'}
@@ -401,6 +605,7 @@ const Consumables: React.FC = () => {
         </Form>
       </Modal>
 
+      {/* 查看耗材详情模态框 */}
       <Modal
         title="耗材详情"
         open={viewModalVisible}
@@ -419,31 +624,72 @@ const Consumables: React.FC = () => {
                 <strong>耗材编号：</strong>{viewingConsumable.code}
               </Col>
               <Col span={12}>
-                <strong>耗材名称：</strong>{viewingConsumable.name}
+                <strong>产品名称：</strong>{viewingConsumable.name}
               </Col>
               <Col span={12}>
-                <strong>类别：</strong>{viewingConsumable.category?.name}
+                <strong>品牌：</strong>{viewingConsumable.brand || '-'}
               </Col>
               <Col span={12}>
-                <strong>单位：</strong>{viewingConsumable.unit}
+                <strong>货号：</strong>{viewingConsumable.product_code}
               </Col>
               <Col span={12}>
-                <strong>当前库存：</strong>
-                <Tag color={viewingConsumable.stock < viewingConsumable.min_stock ? 'red' : 'green'}>
-                  {viewingConsumable.stock} {viewingConsumable.unit}
+                <strong>CAS号：</strong>{viewingConsumable.cas_number || '-'}
+              </Col>
+              <Col span={12}>
+                <strong>形态：</strong>{viewingConsumable.form ? ConsumableFormLabels[viewingConsumable.form] : '-'}
+              </Col>
+              <Col span={12}>
+                <strong>分类：</strong>
+                <Tag color={viewingConsumable.consumable_type === 'reagent' ? 'blue' : 'green'}>
+                  {ConsumableTypeLabels[viewingConsumable.consumable_type]}
                 </Tag>
               </Col>
               <Col span={12}>
-                <strong>最低库存：</strong>{viewingConsumable.min_stock} {viewingConsumable.unit}
+                <strong>是否危化品：</strong>
+                <Tag color={viewingConsumable.is_hazardous ? 'red' : 'default'}>
+                  {viewingConsumable.is_hazardous ? '是' : '否'}
+                </Tag>
               </Col>
               <Col span={12}>
-                <strong>供应商：</strong>{viewingConsumable.supplier?.name || '-'}
+                <strong>规格：</strong>{viewingConsumable.specifications || '-'}
               </Col>
               <Col span={12}>
-                <strong>单价：</strong>{viewingConsumable.price ? `¥${viewingConsumable.price.toFixed(2)}` : '-'}
+                <strong>现存数量：</strong>
+                <Tag color={viewingConsumable.stock < viewingConsumable.min_stock ? 'red' : 'green'}>
+                  {viewingConsumable.stock}
+                </Tag>
               </Col>
               <Col span={12}>
-                <strong>存放位置：</strong>{viewingConsumable.location || '-'}
+                <strong>最低库存：</strong>{viewingConsumable.min_stock}
+              </Col>
+              <Col span={12}>
+                <strong>课题组保管人：</strong>{viewingConsumable.custodian_name}
+              </Col>
+              <Col span={12}>
+                <strong>保管人联系方式：</strong>{viewingConsumable.custodian_phone}
+              </Col>
+              <Col span={12}>
+                <strong>产品最早生产日期：</strong>{viewingConsumable.production_date || '-'}
+              </Col>
+              <Col span={12}>
+                <strong>产品保质期：</strong>{viewingConsumable.expiration_date || '-'}
+              </Col>
+              <Col span={12}>
+                <strong>是否过期：</strong>
+                <Tag color={viewingConsumable.is_expired ? 'red' : 'green'}>
+                  {viewingConsumable.is_expired ? '已过期' : '未过期'}
+                </Tag>
+              </Col>
+              <Col span={12}>
+                <strong>存放位置：</strong>
+                {[viewingConsumable.campus, viewingConsumable.building, viewingConsumable.room, viewingConsumable.storage_area]
+                  .filter(Boolean).join('/') || '-'}
+              </Col>
+              <Col span={12}>
+                <strong>单价：</strong>{viewingConsumable.price ? `¥${viewingConsumable.price}` : '-'}
+              </Col>
+              <Col span={24}>
+                <strong>备注：</strong>{viewingConsumable.remarks || '-'}
               </Col>
             </Row>
           </Card>

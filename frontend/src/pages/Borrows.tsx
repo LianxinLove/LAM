@@ -22,7 +22,7 @@ import {
 import { getBorrows, createBorrow, returnAsset } from '../api/borrows';
 import { getAssets } from '../api/assets';
 import { useAuth } from '../contexts/AuthContext';
-import type { BorrowRecord, Asset, BorrowFormData, QueryParams } from '../types';
+import type { BorrowRecord, AssetLite, BorrowFormData, QueryParams } from '../types';
 import '../styles/common.scss';
 
 const { Option } = Select;
@@ -31,7 +31,7 @@ const { TextArea } = Input;
 // 资产借用页面组件
 const Borrows: React.FC = () => {
   const [records, setRecords] = useState<BorrowRecord[]>([]);
-  const [availableAssets, setAvailableAssets] = useState<Asset[]>([]);
+  const [availableAssets, setAvailableAssets] = useState<AssetLite[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
@@ -91,8 +91,9 @@ const Borrows: React.FC = () => {
       setModalVisible(false);
       fetchRecords();
       fetchAvailableAssets();
-    } catch (error) {
-      message.error('借用失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '借用失败';
+      message.error(errorMsg);
     }
   };
 
@@ -103,8 +104,9 @@ const Borrows: React.FC = () => {
       message.success('归还成功');
       fetchRecords();
       fetchAvailableAssets();
-    } catch (error) {
-      message.error('归还失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '归还失败';
+      message.error(errorMsg);
     }
   };
 
@@ -233,7 +235,7 @@ const Borrows: React.FC = () => {
             <Select placeholder="请选择可用的资产">
               {availableAssets.map(asset => (
                 <Option key={asset.id} value={asset.id}>
-                  {asset.code} - {asset.name}
+                  {asset.lab_asset_code} - {asset.name}
                 </Option>
               ))}
             </Select>
@@ -272,7 +274,7 @@ const Borrows: React.FC = () => {
                 <strong>资产名称：</strong>{viewingRecord.asset?.name}
               </Col>
               <Col span={12}>
-                <strong>资产编号：</strong>{viewingRecord.asset?.code}
+                <strong>资产编号：</strong>{viewingRecord.asset?.lab_asset_code}
               </Col>
               <Col span={12}>
                 <strong>借用日期：</strong>{new Date(viewingRecord.borrow_date).toLocaleString('zh-CN')}

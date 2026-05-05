@@ -26,15 +26,11 @@ const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || '/api';
  * - baseURL: API 基础路径
  * - timeout: 请求超时时间（毫秒），10秒
  * - withCredentials: 允许跨域请求携带 Cookie（关键配置）
- * - headers: 默认请求头，设置 Content-Type 为 JSON
  */
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 60000,  // 增加超时时间以支持文件上传
   withCredentials: true,  // 允许跨域携带 Cookie，Session-Cookie 认证的关键配置
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 /**
@@ -45,12 +41,17 @@ const api: AxiosInstance = axios.create({
  * 技术要点：
  * - Session-Cookie 认证方式不需要手动添加 token
  * - 浏览器会自动携带 Cookie 中的 session_id
- * - 此处可用于添加其他通用请求头或日志记录
+ * - FormData 时不设置 Content-Type，让浏览器自动设置
  */
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Session-Cookie 认证：浏览器自动处理 Cookie
-    // 不需要手动添加 Authorization header
+    // 如果 data 是 FormData，不设置 Content-Type
+    // 让浏览器自动设置并添加 boundary 参数
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    } else if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
     return config;
   },
   (error) => {

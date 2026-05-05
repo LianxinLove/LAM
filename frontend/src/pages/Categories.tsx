@@ -70,8 +70,9 @@ const Categories: React.FC = () => {
       await deleteCategory(id);
       message.success('删除成功');
       fetchCategories();
-    } catch (error) {
-      message.error('删除失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '删除失败';
+      message.error(errorMsg);
     }
   };
 
@@ -87,8 +88,9 @@ const Categories: React.FC = () => {
       }
       setModalVisible(false);
       fetchCategories();
-    } catch (error) {
-      message.error(editingCategory ? '更新失败' : '创建失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || (editingCategory ? '更新失败' : '创建失败');
+      message.error(errorMsg);
     }
   };
 

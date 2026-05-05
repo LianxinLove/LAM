@@ -103,8 +103,9 @@ const Picks: React.FC = () => {
       message.success('领料申请已提交');
       setModalVisible(false);
       fetchRecords();
-    } catch (error) {
-      message.error('提交失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '提交失败';
+      message.error(errorMsg);
     }
   };
 
@@ -118,8 +119,9 @@ const Picks: React.FC = () => {
       }
       message.success(action === 'approve' ? '已批准' : '已拒绝');
       fetchRecords();
-    } catch (error) {
-      message.error('操作失败');
+    } catch (error: any) {
+      const errorMsg = error?.message || '操作失败';
+      message.error(errorMsg);
     }
   };
 

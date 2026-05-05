@@ -68,6 +68,11 @@ dist-ssr/
 # Docker
 *.tar
 
+<<<<<<< HEAD
 # Claude Code (本地配置)
 .claude/settings.local.json
 .claude/memory/
+=======
+# 上传文件（运行时生成）
+backend/uploads/
+>>>>>>> 2a53791a2d81b98ebc7fa65a4537c0f79f920c25

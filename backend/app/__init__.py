@@ -12,7 +12,7 @@
 # - Flask-Session: 服务端会话管理
 # - Flask-CORS: 跨域资源共享
 
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_cors import CORS
 from app.config import Config
 from app.extensions import db, migrate, session
@@ -43,7 +43,7 @@ def create_app(config_class=Config):
     # Returns:
     #     Flask: 配置完成的 Flask 应用实例
     # """
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=None)
     app.config.from_object(config_class)
 
     # ========== 确保必要的目录存在 ==========
@@ -61,6 +61,11 @@ def create_app(config_class=Config):
         db_dir = os.path.dirname(db_file)
         if db_dir and not os.path.exists(db_dir):
             os.makedirs(db_dir, exist_ok=True)
+
+    # 确保上传目录存在
+    upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
+    images_dir = os.path.join(upload_dir, 'images')
+    os.makedirs(images_dir, exist_ok=True)
 
     # ========== 初始化扩展 ==========
 
@@ -105,6 +110,13 @@ def create_app(config_class=Config):
     # - 返回标准化的 JSON 错误响应
     from app.utils.error_handlers import register_error_handlers
     register_error_handlers(app)
+
+    # ========== 静态文件服务（上传的文件） ==========
+
+    @app.route('/uploads/images/<path:filename>')
+    def serve_uploaded_image(filename):
+        """提供上传的图片文件"""
+        return send_from_directory(images_dir, filename)
 
     # ========== 自动创建数据库表 ==========
 
