@@ -27,7 +27,9 @@
       "Bash(docker exec lab-frontend ls -la /usr/share/nginx/html/js/)",
       "Bash(docker exec lab-frontend sh -c \"ls -la /usr/share/nginx/html/js/\")",
       "Bash(docker exec lab-backend sh -c \"ls -la /app/data/ 2>&1; whoami; id\")",
-      "Bash(docker exec lab-backend sh -c \"flask db upgrade 2>&1\")"
+      "Bash(docker exec lab-backend sh -c \"flask db upgrade 2>&1\")",
+      "Bash(git diff *)",
+      "Bash(git config *)"
     ]
   }
 }

@@ -46,6 +46,11 @@ const MainLayout: React.FC = () => {
       label: '仪表盘',
     },
     {
+      key: '/statistics',
+      icon: <BarChartOutlined />,
+      label: '统计分析',
+    },
+    {
       key: '/assets',
       icon: <AppstoreOutlined />,
       label: '资产管理',
@@ -82,11 +87,6 @@ const MainLayout: React.FC = () => {
         label: '操作日志',
       },
     ] : []),
-    {
-      key: '/statistics',
-      icon: <BarChartOutlined />,
-      label: '统计分析',
-    },
     {
       key: 'settings',
       icon: <SettingOutlined />,
